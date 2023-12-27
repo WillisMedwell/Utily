@@ -17,7 +17,7 @@
 > **Algorithms**
 > - [ ] [Split](#split)
 >   - [x] SplitByElement
->   - [ ] SplitByElements
+>   - [x] SplitByElements
 >   - [ ] SplitByRange
 >   - [ ] SplitByRanges 
 
@@ -85,12 +85,19 @@ Just a collection of [concepts](https://en.cppreference.com/w/cpp/concepts) to r
 --- 
 ### Split
 Subdividing ranges ('splitting') is so common and there's many slightly different ways we need to do it. The `Utily::split` function lets you do it all. 
+**split**
+```c++
+// auto = Utily::SplitByElement<std::string_view>
+auto splitter1 = Utily::split("abcd"sv, 'b');
 
+// auto = Utily::SplitByElements<std::string_view, 3, char>
+auto splitter2 = Utily::split("abcd"sv, 'b', 'd', 'c');
+```
 **SplitByElement**
 ```c++
 std::string notes = " I use only the  Utily library . ";
 // NOTE: std::string_view split-type for char arrays.
-for(std::string_view word : Utily::split(notes, ' ')) {
+for(std::string_view word : Utily::SplitByElement(notes, ' ')) {
     std::cout << word << '-';
 }
 // I-use-only-the-Utily-library-.-
@@ -98,10 +105,11 @@ for(std::string_view word : Utily::split(notes, ' ')) {
 
 **SplitByElements**
 ```c++
-std::string notes = " I use only the  Utily library . ";
-// NOTE: std::string_view split-type for char arrays.
-for(std::string_view word : Utily::split(notes, ' ', '.')) {
-    std::cout << word << '-';
+std::vector<int> nums = {1, 2, 3, 4, 5, 6};
+// NOTE: std::span split-type for contigious non-char arrays.
+for(std::span<const int> num : Utily::SplitByElements(notes, std::to_array({ 2, 4 })) {
+    std::print("{}, " num)
 }
-// I-use-only-the-Utily-library-
+// [1], [3], [5, 6],
 ```
+
