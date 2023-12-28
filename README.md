@@ -2,9 +2,11 @@
 **Utily** is a utility library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to build clean, robust, and performant code in C++.
 
 ## Contents
+- [x] = implemented. ✅ = tested.
+
 > **Error Handling**
 > - [x] [Error](#error)
-> - [x] [Result](#result)
+> - [x] [Result](#result) ✅
 
 > **Data Stuctures**
 > - [ ] [StaticVector](#staticvector)
@@ -12,14 +14,21 @@
 
 > **Type Info**
 > - [ ] [Reflection](#reflection) 
-> - [ ] [Concepts](#concepts)
+> - [ ] [Concepts](#concepts) 
 
 > **Algorithms**
 > - [ ] [Split](#split)
->   - [x] SplitByElement
->   - [x] SplitByElements
+>   - [x] SplitByElement ✅
+>   - [x] SplitByElements ✅
 >   - [ ] SplitByRange
->   - [ ] SplitByRanges 
+>   - [ ] SplitByRanges
+> 
+> - [ ] [TupleAlgo](#tuplealgo)
+>   - [x] TupleAlgo::for_each
+>   - [x] TupleAlgo::copy 
+>   - [ ] TupleAlgo::reduce
+>   - [ ] TupleAlgo::transform 
+ 
 
 ## Examples
 ### Error 
@@ -85,6 +94,7 @@ Just a collection of [concepts](https://en.cppreference.com/w/cpp/concepts) to r
 --- 
 ### Split
 Subdividing ranges ('splitting') is so common and there's many slightly different ways we need to do it. The `Utily::split` function lets you do it all. 
+
 **split**
 ```c++
 // auto = Utily::SplitByElement<std::string_view>
@@ -111,5 +121,42 @@ for(std::span<const int> num : Utily::SplitByElements(notes, std::to_array({ 2, 
     std::print("{}, " num)
 }
 // [1], [3], [5, 6],
+```
+
+### TupleAlgo
+Often we have a tuple of things that we want to iterate over (like an array) but treat each type in its own special way when we encounter it.
+**TupleAlgo::for_each**
+```c++
+struct Print
+{
+    auto operator()(int a) {
+        std::cout << a << ' ';
+    }
+    auto operator()(bool a) {
+        std::cout << (a) ? "true" : "false"  << ' ';
+    }
+};
+
+// compiles and outputs: "1 true 2 false "
+Utily::TupleAlgo::for_each(std::make_tuple(1, true, 2, false), Print);
+
+// fails to compile: "static assertion failed: Predicate must be callable with all tuple element types"
+Utily::TupleAlgo::for_each(std::make_tuple(1, true, 2, "hi"sv), Print);
+
+```
+
+**TupleAlgo::copy**
+```c++
+/*
+    This gives the compiler a ton of information so 
+    the generated asm is typically super efficient.
+*/
+template<typename T, typename... Args>
+constexpr auto to_array(Args&&... args)
+{
+    auto array = std::array<T, sizeof...(Args)>{};
+    Utily::TupleAlgo::copy(std::forward_as_tuple(args...), array.begin());
+    return array;
+}
 ```
 

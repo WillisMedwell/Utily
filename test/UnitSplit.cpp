@@ -119,9 +119,4 @@ TEST(Split, Split) {
         EXPECT_EQ(splitter.evaluate().size(), 1);
     }
 
-    std::vector<int> nums = { 1, 2, 3, 4, 5, 6 };
-    // NOTE: std::span split-type for contigious non-char arrays.
-    for(std::span<const int> num : Utily::SplitByElements(nums, std::to_array({ 2, 4 }))) {
-        std::print("{}, ", std::vector<int>{num.begin(), num.end()});
-    }
 }
