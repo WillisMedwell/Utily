@@ -15,11 +15,12 @@
 namespace Utily {
 
     template <std::ranges::range Container, typename Delim = std::ranges::range_value_t<Container>>
-        requires std::equality_comparable_with<Delim, std::ranges::range_value_t<Container>>
+        requires std::equality_comparable_with<Delim, std::ranges::range_value_t<Container>> && (!std::is_reference_v<Container>)
     class SplitByElement
     {
         using ContainerIter = Container::const_iterator;
         using ContainerValue = std::ranges::range_value_t<Container>;
+
 
         const Container& _container;
         const Delim _delim;
@@ -28,6 +29,8 @@ namespace Utily {
         constexpr SplitByElement(const Container& container, const Delim& delim)
             : _container(container)
             , _delim(delim) { }
+
+        SplitByElement(Container&& container, const Delim& delim) = delete;
 
         struct Iterator {
         public:
@@ -219,6 +222,7 @@ namespace Utily {
     };
 
     template <std::ranges::range Container, typename... Args>
+        requires(!std::is_reference_v<Container>)
     auto split(const Container& container, Args&&... args) {
         using FirstArg = std::tuple_element_t<0, std::tuple<Args...>>;
 
@@ -234,4 +238,7 @@ namespace Utily {
         static_assert(use_split_by_element || use_split_by_elements, "Obsure split operation");
     }
 
+    template <std::ranges::range Container, typename... Args>
+        requires(!std::is_reference_v<Container>)
+    auto split(Container&& container, Args&&... args) = delete;
 }

@@ -15,6 +15,15 @@ namespace Utily {
         static_assert(HasMoveConstructor<std::string>);
 
         template <typename T>
+        concept HasMoveOperator = requires(T t, T&& move) {
+            {
+                t = std::forward<T>(move)
+            } -> std::same_as<T&>;
+        };
+        static_assert(HasMoveOperator<std::string>);
+
+
+        template <typename T>
         concept HasCopyConstructor = requires(const T& t) {
             {
                 T { t }
@@ -22,6 +31,14 @@ namespace Utily {
         };
         static_assert(HasCopyConstructor<std::string>);
         static_assert(!HasCopyConstructor<std::unique_ptr<int>>);
+
+        template <typename T>
+        concept HasCopyOperator = requires(T t, const T& copy) {
+            {
+                t = copy
+            } -> std::same_as<T&>;
+        };
+        static_assert(HasCopyOperator<std::string>);
 
         template <typename T>
         concept IsContiguousRange = requires(T t) {

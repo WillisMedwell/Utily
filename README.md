@@ -2,7 +2,7 @@
 **Utily** is a utility library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to build clean, robust, and performant code in C++.
 
 ## Contents
-- [x] = implemented. ✅ = tested.
+- [x] = Implemented. ✅ = Tested.
 
 > **Error Handling**
 > - [x] [Error](#error)
@@ -27,8 +27,7 @@
 >   - [x] TupleAlgo::for_each
 >   - [x] TupleAlgo::copy 
 >   - [ ] TupleAlgo::reduce
->   - [ ] TupleAlgo::transform 
- 
+>   - [ ] TupleAlgo::transform  
 
 ## Examples
 ### Error 
@@ -39,7 +38,7 @@ std::cout << error.what(); // Bad input
 ```
 ---
 ### Result
-Useful return type for when things can fail. Its pretty much a wrapper around [std::variant](https://en.cppreference.com/w/cpp/utility/variant) specifying the good and bad types. The goal is to be less hassle than [std::expected](https://en.cppreference.com/w/cpp/utility/expected). 
+Useful return type for when things can fail. Its pretty much a wrapper around [`std::variant`](https://en.cppreference.com/w/cpp/utility/variant) specifying the good and bad types. The goal is to be less hassle than [`std::expected`](https://en.cppreference.com/w/cpp/utility/expected). 
 
 ```c++
 constexpr Utily::Result<int, Utily::Error> do_thing()
@@ -73,7 +72,7 @@ auto result = do_thing()
 ```
 ---
 ### Reflection
-Basic type reflection using [std::source_location](https://en.cppreference.com/w/cpp/utility/source_location) avaliable since C++20.
+Basic type reflection using [`std::source_location`](https://en.cppreference.com/w/cpp/utility/source_location) avaliable since C++20.
 ```c++
 struct Foo;
 
@@ -83,7 +82,7 @@ std::println("Name: {}", name); // Name: Foo
 ```
 ---
 ### StaticVector
-A stack based vector with a fixed capacity. Useful when you want to avoid heap allocations. 
+A stack based `std::vector` with a fixed capacity. Useful when you want to avoid heap allocations. 
 ```c++
 Utily::StaticVector<int, 10> s_vector{1, 2, 3, 4};
 ```
@@ -122,9 +121,11 @@ for(std::span<const int> num : Utily::SplitByElements(notes, std::to_array({ 2, 
 }
 // [1], [3], [5, 6],
 ```
+---
 
 ### TupleAlgo
-Often we have a tuple of things that we want to iterate over (like an array) but treat each type in its own special way when we encounter it.
+Often we have a `std::tuple` we want to iterate over like an array. Unlike a typical array, each element in a `std::tuple` may have a distinct type, and we aim to handle each type with a tailored approach when we come across it.
+
 **TupleAlgo::for_each**
 ```c++
 struct Print
@@ -140,7 +141,8 @@ struct Print
 // compiles and outputs: "1 true 2 false "
 Utily::TupleAlgo::for_each(std::make_tuple(1, true, 2, false), Print);
 
-// fails to compile: "static assertion failed: Predicate must be callable with all tuple element types"
+// fails to compile: 
+// "static assertion failed: Predicate must be callable with all tuple element types"
 Utily::TupleAlgo::for_each(std::make_tuple(1, true, 2, "hi"sv), Print);
 
 ```
@@ -159,4 +161,4 @@ constexpr auto to_array(Args&&... args)
     return array;
 }
 ```
-
+---
