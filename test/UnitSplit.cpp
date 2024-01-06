@@ -12,7 +12,7 @@ using namespace std::literals;
 TEST(Split, SplitsByElement) {
     { // Basic string split
         auto string = "   this is  test   string "sv;
-        Utily::SplitByElement splitter { string, ' ' };
+        Utily::Split::ByElement splitter { string, ' ' };
         auto iter = splitter.begin();
         EXPECT_EQ(*(iter), "this"sv);
         EXPECT_EQ(*(++iter), "is"sv);
@@ -22,7 +22,7 @@ TEST(Split, SplitsByElement) {
 
     { // non-contigious split
         std::list<int> list;
-        Utily::SplitByElement splitter { list, 0 };
+        Utily::Split::ByElement splitter { list, 0 };
         using SplitType = decltype(*splitter.begin());
         static_assert(
             !std::same_as<SplitType, std::string_view>
@@ -31,28 +31,28 @@ TEST(Split, SplitsByElement) {
 
     { // std::string
         std::string string;
-        Utily::SplitByElement splitter { string, 0 };
+        Utily::Split::ByElement splitter { string, 0 };
         using SplitType = decltype(*splitter.begin());
         static_assert(std::same_as<SplitType, std::string_view>);
     }
 
     { // std::string
         std::string_view string;
-        Utily::SplitByElement splitter { string, 0 };
+        Utily::Split::ByElement splitter { string, 0 };
         using SplitType = decltype(*splitter.begin());
         static_assert(std::same_as<SplitType, std::string_view>);
     }
 
     { // std::vector
         std::vector<int> string;
-        Utily::SplitByElement splitter { string, 0 };
+        Utily::Split::ByElement splitter { string, 0 };
         using SplitType = decltype(*splitter.begin());
         static_assert(std::same_as<SplitType, std::span<const int>>);
     }
 
     { // evaluate
         auto string = "   this is  test   string "sv;
-        Utily::SplitByElement splitter { string, ' ' };
+        Utily::Split::ByElement splitter { string, ' ' };
         auto evaled = splitter.evaluate();
         EXPECT_EQ(evaled.size(), 4);
         EXPECT_EQ(evaled[0], "this"sv);
@@ -65,7 +65,7 @@ TEST(Split, SplitsByElement) {
 TEST(Split, SplitByElements) {
     { // Basic string split
         auto string = "   this is  test   string "sv;
-        Utily::SplitByElements splitter { string, std::to_array({ ' ', 's' }) };
+        Utily::Split::ByElements splitter { string, std::to_array({ ' ', 's' }) };
         auto iter = splitter.begin();
         EXPECT_EQ(*(iter), "thi"sv);
         EXPECT_EQ(*(++iter), "i"sv);
@@ -76,7 +76,7 @@ TEST(Split, SplitByElements) {
 
     { // non-contigious split
         std::list<int> list;
-        Utily::SplitByElements splitter { list, std::to_array({ 0, 1 }) };
+        Utily::Split::ByElements splitter { list, std::to_array({ 0, 1 }) };
         using SplitType = decltype(*splitter.begin());
         static_assert(
             !std::same_as<SplitType, std::string_view>
@@ -85,21 +85,21 @@ TEST(Split, SplitByElements) {
 
     { // std::string
         std::string string;
-        Utily::SplitByElements splitter { string, std::to_array({ 0, 1 }) };
+        Utily::Split::ByElements splitter { string, std::to_array({ 0, 1 }) };
         using SplitType = decltype(*splitter.begin());
         static_assert(std::same_as<SplitType, std::string_view>);
     }
 
     { // std::vector
         std::vector<int> vector;
-        Utily::SplitByElements splitter { vector, std::to_array({ 0, 1 }) };
+        Utily::Split::ByElements splitter { vector, std::to_array({ 0, 1 }) };
         using SplitType = decltype(*splitter.begin());
         static_assert(std::same_as<SplitType, std::span<const int>>);
     }
 
     { // Basic string split
         auto string = "   this is  test   string "sv;
-        Utily::SplitByElements splitter { string, std::to_array({ ' ', 's' }) };
+        Utily::Split::ByElements splitter { string, std::to_array({ ' ', 's' }) };
         EXPECT_EQ(splitter.evaluate()[0], "thi"sv);
         EXPECT_EQ(splitter.evaluate()[1], "i"sv);
         EXPECT_EQ(splitter.evaluate()[2], "te"sv);
@@ -112,7 +112,7 @@ TEST(Split, split) {
     { // Split - ByElement deduction
         auto val = "112233"sv;
         auto splitter = Utily::split(val, '2');
-        static_assert(std::same_as<decltype(splitter), Utily::SplitByElement<std::string_view>>);
+        static_assert(std::same_as<decltype(splitter), Utily::Split::ByElement<std::string_view>>);
         EXPECT_EQ(splitter.evaluate()[0], "11");
         EXPECT_EQ(splitter.evaluate().size(), 2);
     }
@@ -120,7 +120,7 @@ TEST(Split, split) {
     { // Split - ByElements deduction
         auto val = "112233"sv;
         auto splitter = Utily::split(val, '2', '1');
-        static_assert(std::same_as<decltype(splitter), Utily::SplitByElements<std::string_view, 2, char>>);
+        static_assert(std::same_as<decltype(splitter), Utily::Split::ByElements<std::string_view, 2, char>>);
         EXPECT_EQ(splitter.evaluate()[0], "33");
         EXPECT_EQ(splitter.evaluate().size(), 1);
     }
