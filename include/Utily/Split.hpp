@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <execution>
 #include <iterator>
 #include <numeric>
 #include <ranges>
@@ -21,7 +22,6 @@ namespace Utily {
         using ContainerIter = Container::const_iterator;
         using ContainerValue = std::ranges::range_value_t<Container>;
 
-
         const Container& _container;
         const Delim _delim;
 
@@ -37,13 +37,12 @@ namespace Utily {
             ContainerIter current_begin;
             ContainerIter current_end;
             ContainerIter end;
-            const Delim& delim;
+            Delim delim;
 
             constexpr auto operator++() noexcept -> Iterator& {
                 if (current_end != end) {
-                    current_begin = std::ranges::find_if_not(
-                        current_end, end, [&](const auto& element) { return element == delim; });
-                    current_end = std::ranges::find(current_begin, end, delim);
+                    current_begin = std::find_if_not(current_end, end, [&](auto element) { return element == delim; });
+                    current_end = std::find(current_begin, end, delim);
                 } else {
                     current_begin = end;
                 }
@@ -58,7 +57,7 @@ namespace Utily {
 
         private:
             // purely for type deduction
-            consteval static auto deference_type() {
+            consteval static auto dereference_type() {
                 if constexpr (std::same_as<ContainerValue, char>) {
                     return std::string_view {};
                 } else if constexpr (Utily::Concepts::IsContiguousRange<Container>) {
@@ -67,16 +66,16 @@ namespace Utily {
                     return std::ranges::subrange<ContainerIter, ContainerIter> {};
                 }
             }
-            using DerefenceType = decltype(deference_type());
+            using DereferenceType = std::decay_t<decltype(dereference_type())>;
 
         public:
             [[nodiscard]] constexpr auto
             operator*() const noexcept {
-                return DerefenceType { current_begin, current_end };
+                return DereferenceType { current_begin, current_end };
             }
 
             using difference_type = std::ptrdiff_t;
-            using value_type = DerefenceType;
+            using value_type = DereferenceType;
             using reference = std::add_lvalue_reference_t<value_type>;
             using pointer = std::add_pointer_t<value_type>;
             using iterator_category = std::forward_iterator_tag;
@@ -119,6 +118,7 @@ namespace Utily {
     };
 
     template <std::ranges::range Container, size_t S, typename Delim = std::ranges::range_value_t<Container>>
+        requires(!std::is_reference_v<Container>)
     class SplitByElements
     {
     private:
@@ -126,7 +126,6 @@ namespace Utily {
         using ContainerValue = std::ranges::range_value_t<Container>;
         using Delims = std::array<Delim, S>;
         const Container& _container;
-
         const Delims _delims;
 
     public:
@@ -143,7 +142,7 @@ namespace Utily {
 
             constexpr auto operator++() noexcept -> Iterator& {
                 auto is_delimiter = [&](const auto& element) {
-                    return std::ranges::find(delims, element) != delims.end(); 
+                    return std::ranges::find(delims, element) != delims.end();
                 };
                 if (current_end != end) {
                     current_begin = std::ranges::find_if_not(current_end, end, is_delimiter);
@@ -231,9 +230,8 @@ namespace Utily {
 
         if constexpr (use_split_by_element) {
             return SplitByElement(container, args...);
-        }
-        else if constexpr(use_split_by_elements) {
-            return SplitByElements(container, std::to_array({args...}));
+        } else if constexpr (use_split_by_elements) {
+            return SplitByElements(container, std::to_array({ args... }));
         }
         static_assert(use_split_by_element || use_split_by_elements, "Obsure split operation");
     }
