@@ -1,6 +1,8 @@
 # Utily
 **Utily** is a header-only library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust and compile-time compatiable** code in C++.
 
+In addition the library is **optimised for Windows, Emscripten**, and Linux too.
+
 ## API Contents
 
 ```c++
@@ -9,6 +11,9 @@ namespace Utily {
     class Error;    // TOTEST
     class Result;   // TOTEST
     class StaticVector<T, S>;
+
+    /* Operating-System Optimised. (including Emscripten) */
+    class AsyncFileReader;    // TODO EMSCRIPTEN & LINUX & TOTEST
 
     /* Iterator Adaptors. */
     namespace Split {
@@ -46,7 +51,7 @@ namespace Utily {
 
 ## API Usage
 
-<details><summary><b>Utily::Error</b> - a basic error type, like an exception.</summary>
+<details><summary><b>Utily::Error</b></summary>
 
 Useful to flag basic errors. Prefer passing a `std::string_view`/`const char*` over a `std::string` as they're cheaper. 
 
@@ -59,7 +64,7 @@ std::cout << error.what(); // Bad input
 
 </details>
 
-<details><summary><b>Utily::Result</b> - a better return type when operations can fail.</summary>
+<details><summary><b>Utily::Result</b></summary>
 
 Useful return type for when things can fail. Its pretty much a wrapper around [`std::variant`](https://en.cppreference.com/w/cpp/utility/variant) specifying the good and bad types. The goal is to be less hassle than [`std::expected`](https://en.cppreference.com/w/cpp/utility/expected). 
 
@@ -98,6 +103,32 @@ auto result = do_thing()
 
 </details>
 
+<details><summary><b>Utily::AsyncFileReader</b></summary>
+
+An async file reader. Optimised for each supported system by using API calls. 
+
+```c++
+Utily::AsyncFileReader::push(STANFORD_BUNNY_PATH).on_error([](auto& e) { std::cerr << e.what(); });
+Utily::AsyncFileReader::push(SMALL_TEXT_PATH).on_error([](auto& e) { std::cerr << e.what(); });
+
+Utily::AsyncFileReader::wait_for_all();
+
+// 3 MB
+std::vector<char> bunny = Utily::AsyncFileReader::pop(STANFORD_BUNNY_PATH);
+// 38 Bytes
+std::vector<char> text  = Utily::AsyncFileReader::pop(SMALL_TEXT_PATH);
+```
+
+**Notes:** 
+- On windows it is run on the main thread.
+    *(Much faster than STL, and sometimes even faster than basic WIN32 as it is uses the Async WIN32 API.)*
+
+---
+
+</details>
+
+
+
 <details><summary><b>Utily::Reflection</b></summary>
 
 Basic type reflection using [`std::source_location`](https://en.cppreference.com/w/cpp/utility/source_location) avaliable since C++20.
@@ -133,7 +164,7 @@ Just a collection of [concepts](https://en.cppreference.com/w/cpp/concepts) to r
 </details>
 
 
-<details><summary><b>Utily::Split</b> - common splitting operations especially for strings.</summary>
+<details><summary><b>Utily::Split</b></summary>
 
 Subdividing ranges ('splitting') is so common and there's many slightly different ways we need to do it. Below are the iterator classes for each type of split.
 

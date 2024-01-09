@@ -1,6 +1,7 @@
 
-#include <benchmark/benchmark.h>
 #include "Utily/Utily.hpp"
+#include <benchmark/benchmark.h>
+
 
 constexpr int N = 100;
 using T = std::vector<int>;
@@ -19,7 +20,7 @@ static void BM_StaticVector_PushBack(benchmark::State& state) {
         Utily::StaticVector<T, N> v;
         state.ResumeTiming();
         for (auto i = 0; i < N; ++i) {
-            v.push_back({i});
+            v.push_back({ i });
         }
     }
 }
@@ -28,7 +29,7 @@ BENCHMARK(BM_StaticVector_PushBack);
 static void BM_StaticVector_Iterate(benchmark::State& state) {
     Utily::StaticVector<T, N> v;
     for (auto i = 0; i < N; ++i) {
-        v.push_back({i});
+        v.push_back({ i });
     }
     for (auto _ : state) {
         for (auto& x : v) {
@@ -52,7 +53,7 @@ static void BM_Vector_PushBack(benchmark::State& state) {
         std::vector<T> v;
         state.ResumeTiming();
         for (auto i = 0; i < N; ++i) {
-            v.push_back(T{i});
+            v.push_back(T { i });
         }
     }
 }
@@ -61,7 +62,7 @@ BENCHMARK(BM_Vector_PushBack);
 static void BM_Vector_Iterate(benchmark::State& state) {
     std::vector<T> v;
     for (auto i = 0; i < N; ++i) {
-        v.push_back(T{i});
+        v.push_back(T { i });
     }
     for (auto _ : state) {
         for (auto& x : v) {
@@ -71,6 +72,7 @@ static void BM_Vector_Iterate(benchmark::State& state) {
 }
 BENCHMARK(BM_Vector_Iterate);
 
+#if 0
 static void BM_Array_Construct(benchmark::State& state) {
     for (auto _ : state) {
         std::array<T, N> a;
@@ -103,3 +105,4 @@ static void BM_Array_Iterate(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Array_Iterate);
+#endif

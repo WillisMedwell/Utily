@@ -23,9 +23,12 @@ find_package(GTest CONFIG REQUIRED)
 target_link_libraries(UtilyTest PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 enable_testing()
 add_test(NAME AllTestsInUtilyTest COMMAND UtilyTest)
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # UtilyBenchmark Setup
 add_executable(UtilyBenchmark ${UTILY_BENCHMARK_SOURCES})
 target_include_directories(UtilyBenchmark PRIVATE ${CMAKE_SOURCE_DIR}/include)
 find_package(benchmark CONFIG REQUIRED)
 target_link_libraries(UtilyBenchmark PRIVATE benchmark::benchmark benchmark::benchmark_main)
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
