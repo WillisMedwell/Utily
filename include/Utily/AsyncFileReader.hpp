@@ -14,241 +14,6 @@
 #include "Utily/Error.hpp"
 #include "Utily/Result.hpp"
 
-/*
-// namespace Utily {
-
-//     class FileReaderAysncQueue
-//     {
-// #if defined(_WIN32)
-
-// #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-
-// #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
-
-// #endif
-
-//         FileReaderAysncQueue();
-//         auto push(std::filesystem::path&& file_path) -> void;
-//         auto pop() -> std::vector<char>;
-//     };
-
-// }
-
-// #if defined(_WIN32)
-
-// auto Utily::FileReaderAysncQueue::push(std::filesystem::path&& file_path) -> void {
-// }
-
-// auto Utily::FileReaderAysncQueue::pop() -> std::vector<char> {
-//     return { };
-// }
-
-// #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-
-// #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
-
-// #endif
-
-// namespace Utily {
-
-//     class File
-//     {
-//         constexpr static size_t page_size = 4096; // 4KB
-
-//         size_t _bytes_size;
-//         size_t _bytes_read;
-//         FILE* _stream;
-//         std::array<char, page_size> _buffer;
-
-//         void stop() {
-//             if (_stream) {
-//                 std::fclose(_stream);
-//                 _stream = nullptr;
-//             }
-//         }
-//         auto init(const std::filesystem::path& path) -> Utily::Result<void, Utily::Error> {
-//             stop();
-
-//             if (!std::filesystem::exists(path)) {
-//                 return Utily::Error { "File does not exists." };
-//             }
-//             std::error_code error_code [[maybe_unused]];
-//             const size_t file_size = std::filesystem::file_size(path, error_code);
-//             if (error_code) {
-//                 return Utily::Error { "Failed to read file size." };
-//             }
-
-//             if (_stream = std::fopen(path.string().c_str(), "r"); _stream)
-//             {
-//                 return Utily::Error { "Failed to open file. Probably in use." };
-//             }
-
-//             if (std::setvbuf(_stream, _buffer.data(), _IOFBF, page_size)) {
-//                 std::fclose(_stream);
-//                 _stream = nullptr;
-//                 return Utily::Error { "Failed to set internal buffer. " };
-//             }
-//         }
-//         auto read_page(char* ptr) {
-//             bool has_failed = std::fgets(ptr, static_cast<int>(page_size), _stream) == nullptr;
-//             if (has_failed) {
-//             }
-//         }
-
-//         File()
-//             : _bytes_size(0)
-//             , _bytes_read(0)
-//             , _stream(nullptr)
-//             , _buffer {} { }
-
-//         File(const File&) = delete;
-//         File& operator=(const File&) = delete;
-
-//         File(File&& other)
-//             : _bytes_size(std::exchange(other._bytes_size, 0))
-//             , _bytes_read(std::exchange(other._bytes_read, 0))
-//             , _stream(std::exchange(other._stream, nullptr))
-//             , _buffer(other._buffer) { }
-//         File& operator=(File&& other) {
-//             std::swap(_bytes_size, other._bytes_size);
-//             std::swap(_bytes_read, other._bytes_read);
-//             std::swap(_stream, other._stream);
-//             std::swap(_buffer, other._buffer);
-//         }
-
-//         ~File() {
-//             stop();
-//         }
-//     };
-
-//     class FileReader
-//     {
-//         using Contents = std::vector<char>;
-
-//         using ContentsIter = std::decay_t<decltype(Contents {}.begin())>;
-
-//         struct StateUninitialised {
-//         };
-
-//         constexpr static size_t buffer_read_amount = 4096; // read 4KB per read_some.
-
-//         struct StateAsyncReading {
-//             Contents contents;
-//             std::ifstream infile_stream;
-//             ContentsIter iter;
-
-//             StateAsyncReading(std::ifstream&& infile, std::ptrdiff_t n)
-//                 : contents(n)
-//                 , infile_stream(std::move(infile))
-//                 , iter(contents.begin()) { }
-//         };
-
-//         struct StateComplete {
-//             Contents contents;
-
-//             StateComplete(StateAsyncReading&& sar)
-//                 : contents(std::move(sar.contents)) {
-//             }
-//         };
-
-//         std::variant<StateUninitialised, StateAsyncReading, StateComplete> _state;
-
-//     public:
-//         constexpr FileReader() noexcept
-//             : _state(StateUninitialised {}) { }
-
-//         auto init(std::filesystem::path path) noexcept -> Utily::Result<void, Utily::Error> {
-//             if (!std::filesystem::exists(path)) {
-//                 return Utily::Error { "File does not exists." };
-//             }
-//             std::error_code error_code [[maybe_unused]];
-//             const size_t file_size = std::filesystem::file_size(path, error_code);
-
-//             std::ifstream infile_stream { path, std::ios::binary };
-//             if (!infile_stream.is_open()) {
-//                 return Utily::Error { "File cannot be opened. Probably in use." };
-//             }
-
-//             // switch into reading.
-//             _state = StateAsyncReading(std::move(infile_stream), file_size);
-
-//             return {};
-//         }
-
-//         [[nodiscard]] bool is_done() const noexcept {
-//             return std::holds_alternative<StateComplete>(_state);
-//         }
-
-//         [[nodiscard]] auto percent_complete() const noexcept -> float {
-//             struct GetPercentComplete {
-//                 float operator()(const StateUninitialised& s [[maybe_unused]]) const {
-//                     return 0.0f;
-//                 }
-//                 float operator()(const StateAsyncReading& s) const {
-//                     return static_cast<float>(std::distance(s.contents.begin(), Contents::const_iterator { s.iter }))
-//                         / static_cast<float>(s.contents.size());
-//                 }
-//                 float operator()(const StateComplete& s [[maybe_unused]]) const {
-//                     return 1.0f;
-//                 }
-//             };
-
-//             return std::visit(GetPercentComplete {}, _state);
-//         }
-
-//     private:
-//         void read_page_impl() noexcept {
-//             auto& sar = std::get<StateAsyncReading>(_state);
-//             assert(sar.infile_stream.is_open());
-//             std::advance(sar.iter, sar.infile_stream.readsome(&(*sar.iter), buffer_read_amount));
-//         }
-
-//         bool is_done_impl() noexcept {
-//             auto& sar = std::get<StateAsyncReading>(_state);
-//             return sar.iter == sar.contents.end();
-//         }
-
-//         void change_state_to_completed() noexcept {
-//             auto& sar = std::get<StateAsyncReading>(_state);
-//             _state = StateComplete { std::move(sar) };
-//         }
-
-//     public:
-//         void read_page() noexcept {
-//             assert(std::holds_alternative<StateAsyncReading>(_state));
-//             read_page_impl();
-//             if (is_done_impl()) {
-//                 change_state_to_completed();
-//             }
-//         }
-//         void read_pages_for(std::chrono::duration<float> duration) noexcept {
-//             assert(std::holds_alternative<StateAsyncReading>(_state));
-
-//             const auto start_time = std::chrono::high_resolution_clock::now();
-
-//             auto get_duration = [&]() {
-//                 auto curr_time = std::chrono::high_resolution_clock::now();
-//                 return std::chrono::duration_cast<std::chrono::duration<float>>(curr_time - start_time);
-//             };
-
-//             while (get_duration() < duration && !is_done_impl()) {
-//                 read_page_impl();
-//             }
-//             if (is_done_impl()) {
-//                 change_state_to_completed();
-//             }
-//         }
-
-//         auto take_contents() -> Contents {
-//             assert(std::holds_alternative<StateComplete>(_state));
-//             auto contents = std::move(std::get<StateComplete>(_state).contents);
-//             _state = StateUninitialised {};
-//             return contents;
-//         }
-//     };
-// }
-*/
-
 #if defined(_WIN32)
 #include <windows.h>
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
@@ -263,17 +28,26 @@ namespace Utily {
 #if defined(_WIN32)
         using FileHandle = HANDLE;
 
-        static void CALLBACK fileIOCompletionRoutine(
-            DWORD dwErrorCode,
-            DWORD dwNumberOfBytesTransfered,
-            LPOVERLAPPED lpOverlapped) {
-            //std::cout << "Read " << dwNumberOfBytesTransfered << " bytes successfully." << std::endl;
-        }
-
         struct FileDataUnfulfilled {
-            FileHandle stream;
+            FileHandle stream = nullptr;
             std::vector<char> contents;
             OVERLAPPED overlapped;
+
+            FileDataUnfulfilled() = default;
+
+            FileDataUnfulfilled(const FileDataUnfulfilled&) = delete;
+
+            FileDataUnfulfilled(FileDataUnfulfilled&& other)
+                : stream(std::exchange(other.stream, nullptr))
+                , contents(std::move(other.contents))
+                , overlapped(std::exchange(other.overlapped, OVERLAPPED {})) { }
+
+            ~FileDataUnfulfilled() {
+                if (stream) {
+                    CloseHandle(stream);
+                    stream = nullptr;
+                }
+            }
         };
 
         struct FileDataFulfilled {
@@ -301,45 +75,36 @@ namespace Utily {
 
     inline auto AsyncFileReader::push(std::filesystem::path file_path) -> Utily::Result<void, Utily::Error> {
         if (files_unfulfilled.contains(file_path) || files_fulfilled.contains(file_path)) {
-            return {}; /*Utily::Error {
-                std::format(
-                    "File \"{}\" is already queued.",
-                    file_path.string())
-            };*/
+            return {};
         }
 
-        if (!std::filesystem::exists(file_path)) {
-            return Utily::Error {
-                std::format(
-                    "File \"{}\" does not exist.",
-                    file_path.string())
-            };
-        }
+        const auto file_str = file_path.string();
+
         FileDataUnfulfilled file_data {};
 
         file_data.stream = CreateFile(
-            file_path.string().c_str(),
+            file_str.c_str(),
             GENERIC_READ,
             FILE_SHARE_READ,
             nullptr,
             OPEN_EXISTING,
             FILE_FLAG_OVERLAPPED,
-            nullptr);
+            nullptr
+        );
 
         if (file_data.stream == INVALID_HANDLE_VALUE) {
             return Utily::Error {
                 std::format(
-                    "File \"{}\" was not able to be opened. But it does exist.",
-                    file_path.string())
+                    "File \"{}\" does not exist.",
+                    file_str)
             };
         }
 
         if (LARGE_INTEGER temp; !GetFileSizeEx(file_data.stream, &temp)) {
-            CloseHandle(file_data.stream);
             return Utily::Error {
                 std::format(
                     "File \"{}\" did not allow us to read the file's size.",
-                    file_path.string())
+                    file_str)
             };
         } else {
             file_data.contents.resize(static_cast<size_t>(temp.QuadPart));
@@ -352,7 +117,7 @@ namespace Utily {
             return Utily::Error {
                 std::format(
                     "File \"{}\" is already queued.",
-                    file_path.string())
+                    file_str)
             };
         }
 
@@ -364,7 +129,6 @@ namespace Utily {
             static_cast<DWORD>(file_data_ref.contents.size()),
             &file_data_ref.overlapped,
             nullptr);
-            //AsyncFileReader::fileIOCompletionRoutine);
 
         if (!has_started_reading) {
             CloseHandle(file_data_ref.stream);
@@ -372,11 +136,9 @@ namespace Utily {
             return Utily::Error {
                 std::format(
                     "File \"{}\" was opened but able to be read.",
-                    file_path.string())
+                    file_str)
             };
         }
-
-        // SleepEx(INFINITE, TRUE);
 
         return {};
     }

@@ -100,4 +100,62 @@ static void BM_Win32_FileReader(benchmark::State& state) {
 }
 BENCHMARK(BM_Win32_FileReader);
 
+static void BM_Win32_FileMappingReader(benchmark::State& state) {
+    bool has_errored = false;
+    for (auto _ : state) {
+        auto get_contents = [&](std::filesystem::path file_path) -> std::vector<char> {
+            // Open the file
+        HANDLE h_file = CreateFile(file_path.string().c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (h_file == INVALID_HANDLE_VALUE) {
+            std::cerr << "Error opening file: " << GetLastError() << std::endl;
+            return {};
+        }
+
+        // Create a file mapping object
+        HANDLE h_map_file = CreateFileMapping(h_file, NULL, PAGE_READONLY, 0, 0, NULL);
+        if (h_map_file == NULL) {
+            std::cerr << "Error creating file mapping: " << GetLastError() << std::endl;
+            CloseHandle(h_file);
+            return {};
+        }
+
+        // Map a view of the file into the address space of the calling process
+        LPVOID lp_map_address = MapViewOfFile(h_map_file, FILE_MAP_READ, 0, 0, 0);
+        if (lp_map_address == NULL) {
+            std::cerr << "Error mapping view of file: " << GetLastError() << std::endl;
+            CloseHandle(h_map_file);
+            CloseHandle(h_file);
+            return {};
+        }
+
+        // Get file size
+        LARGE_INTEGER file_size;
+        if (!GetFileSizeEx(h_file, &file_size)) {
+            std::cerr << "Error getting file size: " << GetLastError() << std::endl;
+            UnmapViewOfFile(lp_map_address);
+            CloseHandle(h_map_file);
+            CloseHandle(h_file);
+            return {};
+        }
+
+        // Read data from the mapped view
+        std::vector<char> file_contents(static_cast<char*>(lp_map_address), static_cast<char*>(lp_map_address) + file_size.QuadPart);
+
+        // Unmap the file view and close the handles
+        UnmapViewOfFile(lp_map_address);
+        CloseHandle(h_map_file);
+        CloseHandle(h_file);
+
+        return file_contents;
+        };
+
+        auto a [[maybe_unused]] = std::vector<char> { get_contents(STANFORD_BUNNY_PATH) };
+        auto b [[maybe_unused]] = std::vector<char> { get_contents(SMALL_TEXT_PATH) };
+
+        benchmark::DoNotOptimize(a);
+        benchmark::DoNotOptimize(b);
+    }
+}
+BENCHMARK(BM_Win32_FileMappingReader);
+
 #endif
