@@ -8,7 +8,7 @@ const static auto STANFORD_BUNNY_PATH = std::filesystem::path { "resources/stanf
 const static auto SMALL_TEXT_PATH = std::filesystem::path { "resources/small.txt" };
 
 static void BM_Utily_AsyncFileReader(benchmark::State& state) {
-    bool has_errored = false;
+    bool [[maybe_unused]] has_errored = false;
     for (auto _ : state) {
 
         Utily::AsyncFileReader::push(STANFORD_BUNNY_PATH).on_error([](auto& e) { std::cerr << e.what(); });
