@@ -255,7 +255,7 @@ namespace Utily {
         }
 
         [[nodiscard]] constexpr auto back() -> T& {
-            return *(begin() + _size - 1);
+            return *(begin() + static_cast<std::ptrdiff_t>(_size) - 1);
         }
     };
     static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);

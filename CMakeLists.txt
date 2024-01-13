@@ -18,7 +18,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format DESTINATION ${CMAKE_CURRENT_
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT MSVC)
-    target_compile_options(Utily_Utily PUBLIC "-Wall" "-Wextra" "-Wpedantic")
+    target_compile_options(Utily_Utily PUBLIC "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Werror" "-Wno-unused" "-Wconversion")
 endif()
 
 set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)

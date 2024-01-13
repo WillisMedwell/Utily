@@ -28,7 +28,7 @@ static void BM_Std_FileReader(benchmark::State& state) {
             std::ifstream file(file_name, std::ios::binary);
 
             file.seekg(0, std::ios::end);
-            size_t fileSize = file.tellg();
+            size_t fileSize = static_cast<size_t>(file.tellg());
 
             file.seekg(0, std::ios::beg);
 
