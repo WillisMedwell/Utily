@@ -1,5 +1,5 @@
 # Utily
-**Utily** is a header-only library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust and compile-time compatiable** code in C++.
+**Utily** is a library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust and compile-time compatiable** code in C++.
 
 In addition the library is **optimised for Windows, Emscripten**, and Linux too.
 
@@ -249,13 +249,24 @@ constexpr auto to_array(Args&&... args)
 ## Installation
 
 <details><summary><b>Modern CMake</b></summary>
+Using Modern cmake features means that we can use CMake as a dependency manager relatively easily.
+ 
+```CMake
+FetchContent_Declare(
+    Utily
+    GIT_REPOSITORY https://github.com/WillisMedwell/Utily.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+)
 
+FetchContent_MakeAvailable(Utily)
 
+target_link_libraries(${PROJECT_NAME} PRIVATE Utily::Utily)
+```
 
-*this section is todo, but will explain how to use cmakes content fetching module.*
+In the future, I would like to have Utily:: supported by package managers like vcpkg and conan.
 
 ---
 
 </details>
 
-*It's header-only too, so you could just download `include/Utily/`. However, this won't auto-magically get the latest release unlike the other options.*

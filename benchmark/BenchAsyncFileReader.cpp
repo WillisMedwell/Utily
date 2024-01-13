@@ -53,7 +53,9 @@ static void BM_Std_FileReader(benchmark::State& state) {
 }
 BENCHMARK(BM_Std_FileReader);
 
-#if _WIN32
+#if defined(_WIN32)
+
+#include <windows.h>
 
 static void BM_Win32_FileReader(benchmark::State& state) {
     bool has_errored = false;
