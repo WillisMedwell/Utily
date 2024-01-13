@@ -8,7 +8,7 @@ const static auto STANFORD_BUNNY_PATH = std::filesystem::path { "resources/stanf
 const static auto SMALL_TEXT_PATH = std::filesystem::path { "resources/small.txt" };
 
 static void BM_Utily_AsyncFileReader(benchmark::State& state) {
-    bool [[maybe_unused]] has_errored = false;
+    bool has_errored [[maybe_unused]] = false;
     for (auto _ : state) {
 
         Utily::AsyncFileReader::push(STANFORD_BUNNY_PATH).on_error([](auto& e) { std::cerr << e.what(); });
@@ -23,7 +23,6 @@ static void BM_Utily_AsyncFileReader(benchmark::State& state) {
 BENCHMARK(BM_Utily_AsyncFileReader);
 
 static void BM_Std_FileReader(benchmark::State& state) {
-    bool has_errored = false;
     for (auto _ : state) {
         auto get_contents = [&](std::filesystem::path file_name) -> std::vector<char> {
             std::ifstream file(file_name, std::ios::binary);
@@ -58,7 +57,7 @@ BENCHMARK(BM_Std_FileReader);
 #include <windows.h>
 
 static void BM_Win32_FileReader(benchmark::State& state) {
-    bool has_errored = false;
+
     for (auto _ : state) {
         auto get_contents = [&](std::filesystem::path file_name) -> std::vector<char> {
             // Open the file
@@ -103,7 +102,6 @@ static void BM_Win32_FileReader(benchmark::State& state) {
 BENCHMARK(BM_Win32_FileReader);
 
 static void BM_Win32_FileMappingReader(benchmark::State& state) {
-    bool has_errored = false;
     for (auto _ : state) {
         auto get_contents = [&](std::filesystem::path file_path) -> std::vector<char> {
             // Open the file

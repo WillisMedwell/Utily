@@ -18,7 +18,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format DESTINATION ${CMAKE_CURRENT_
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+    target_compile_options(Utily_Utily PUBLIC "-Wall" "-Wextra" "-Wpedantic")
 endif()
 
 set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)

@@ -91,7 +91,7 @@ TEST(StaticVector, ProperDestruction) {
         destructions = 0;
     };
 
-    auto [[maybe_unused]] print_state = [&]() {
+    [[maybe_unused]] auto print_state = [&]() {
         std::cout
             << "{}      " << default_constructions << '\n'
             << "copy {} " << copy_constructions << '\n'
