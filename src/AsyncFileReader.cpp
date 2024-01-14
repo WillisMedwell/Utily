@@ -9,6 +9,7 @@
 #include <iostream>
 #include <span>
 
+
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 #error "not implemented unix/apple system"
 #endif
@@ -190,24 +191,6 @@ namespace Utily {
                     file_str)
             };
         }
-
-        auto [iter, was_inserted_successfully] = files_unfulfilled.emplace(std::move(file_path), AsyncFileReader::FileDataUnfulfilled {});
-
-        if (!was_inserted_successfully) {
-            return Utily::Error {
-                std::format(
-                    "File \"{}\" is already queued.",
-                    file_str)
-            };
-        }
-
-        const std::filesystem::path& path = iter->first;
-
-        emscripten_async_wget_data(
-            file_str.c_str(),
-            reinterpret_cast<void*>(const_cast<std::filesystem::path*>(&path)),
-            AsyncFileReader::file_load_callback,
-            AsyncFileReader::file_fail_callback);
 
         return {};
     }
