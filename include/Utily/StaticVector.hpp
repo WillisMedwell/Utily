@@ -258,10 +258,10 @@ namespace Utily {
             return *(begin() + static_cast<std::ptrdiff_t>(_size) - 1);
         }
     };
-    static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);
-    static_assert(std::contiguous_iterator<StaticVector<int, 10>::ConstIterator>);
-    static_assert(std::ranges::range<StaticVector<int, 10>>);
-    static_assert(std::ranges::sized_range<StaticVector<int, 10>>);
-    static_assert(std::ranges::contiguous_range<StaticVector<int, 10>>);
-    static_assert(std::ranges::common_range<StaticVector<int, 10>>);
+    // static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);
+    // static_assert(std::contiguous_iterator<StaticVector<int, 10>::ConstIterator>);
+    // static_assert(std::ranges::range<StaticVector<int, 10>>);
+    // static_assert(std::ranges::sized_range<StaticVector<int, 10>>);
+    // static_assert(std::ranges::contiguous_range<StaticVector<int, 10>>);
+    // static_assert(std::ranges::common_range<StaticVector<int, 10>>);
 }

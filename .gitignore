@@ -32,3 +32,6 @@
 
 .vscode/
 **/build/
+**/build-native/
+**/build-web/
+

@@ -18,7 +18,10 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format DESTINATION ${CMAKE_CURRENT_
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if(NOT MSVC)
+    # Enable all the warnings.
     target_compile_options(Utily_Utily PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Werror" "-Wno-unused" "-Wconversion")
+    # For std::format.
+    target_compile_options(Utily_Utily PRIVATE "-fexperimental-library")
 endif()
 
 set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)
@@ -30,6 +33,10 @@ target_include_directories(Utily_Utily PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includ
 find_package(GTest CONFIG) 
 if(GTest_FOUND)
     add_executable(UtilyTest ${UTILY_TEST_SOURCES})
+    if(DEFINED EMSCRIPTEN)
+        target_compile_options(UtilyTest PRIVATE "-Wdeprecated-declarations")
+        set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    endif()
     target_link_libraries(UtilyTest PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main Utily::Utily)
     enable_testing()
     add_test(NAME AllTestsInUtilyTest COMMAND UtilyTest)
@@ -42,8 +49,13 @@ endif()
 find_package(benchmark CONFIG)
 if(benchmark_FOUND)
     add_executable(UtilyBenchmark ${UTILY_BENCHMARK_SOURCES})
+    if(DEFINED EMSCRIPTEN)
+        target_compile_options(UtilyBenchmark PRIVATE "-Wdeprecated-declarations")
+        set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    endif()
     target_link_libraries(UtilyBenchmark PRIVATE benchmark::benchmark benchmark::benchmark_main Utily::Utily)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else()
     message(STATUS "Package \"benchmark\" not found, not building benchmarks.")
 endif()
+

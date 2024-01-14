@@ -5,6 +5,9 @@
 
 #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>
+#include <format>
+#include <iostream>
+#include <span>
 
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 #error "not implemented unix/apple system"
@@ -37,26 +40,9 @@ namespace Utily {
     };
 
 #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
-
-    struct AsyncFileReader::FlleDataUnfulfilled {
+    struct AsyncFileReader::FileDataUnfulfilled {
         std::monostate dummy;
     };
-
-    static void file_load_callback(void* arg, void* buffer, int buffer_size) {
-        const std::filesystem::path& path = *reinterpret_cast<std::filesystem::path*>(arg);
-
-        std::vector<char> copy { buffer_size };
-        std::copy(buffer, buffer + buffer_size, copy.data());
-
-        files_fulfilled.emplace(path, std::move(copy));
-        files_unfulfilled.erase(path);
-    }
-
-    static void file_fail_callback(void* arg) {
-        const std::filesystem::path& path = *reinterpret_cast<std::filesystem::path*>(arg);
-        std::cerr << std::format("File \"{}\" failed to load.", path.string());
-        files_unfulfilled.erase(path);
-    }
 
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 
@@ -170,14 +156,34 @@ namespace Utily {
 
 #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
 
-    inline auto AsyncFileReader::push(std::filesystem::path file_path) -> Utily::Result<void, Utily::Error> {
+    void AsyncFileReader::file_load_callback(void* arg, void* buffer_begin, int buffer_size) {
+        const std::filesystem::path& path = *reinterpret_cast<std::filesystem::path*>(arg);
+
+        std::vector<char> copy(static_cast<size_t>(buffer_size));
+        std::span<char> buffer {
+            reinterpret_cast<char*>(buffer_begin),
+            static_cast<size_t>(buffer_size)
+        };
+        std::copy(buffer.begin(), buffer.end(), copy.data());
+
+        AsyncFileReader::files_fulfilled.emplace(path, std::move(copy));
+        AsyncFileReader::files_unfulfilled.erase(path);
+    }
+
+    void AsyncFileReader::file_fail_callback(void* arg) {
+        const std::filesystem::path& path = *reinterpret_cast<std::filesystem::path*>(arg);
+        std::cerr << std::format("File \"{}\" failed to load.", path.string());
+        files_unfulfilled.erase(path);
+    }
+
+    auto AsyncFileReader::push(std::filesystem::path file_path) -> Utily::Result<void, Utily::Error> {
         if (files_unfulfilled.contains(file_path) || files_fulfilled.contains(file_path)) {
             return {};
         }
 
         auto file_str = file_path.string();
 
-        if (!std::filesystem::exist(file_path)) {
+        if (!std::filesystem::exists(file_path)) {
             return Utily::Error {
                 std::format(
                     "File \"{}\" does not exist.",
@@ -185,7 +191,7 @@ namespace Utily {
             };
         }
 
-        auto [iter, was_inserted_successfully] = files_unfulfilled.emplace(std::move(path));
+        auto [iter, was_inserted_successfully] = files_unfulfilled.emplace(std::move(file_path), AsyncFileReader::FileDataUnfulfilled {});
 
         if (!was_inserted_successfully) {
             return Utily::Error {
@@ -197,7 +203,21 @@ namespace Utily {
 
         const std::filesystem::path& path = iter->first;
 
-        emscripten_async_wget_data(file_str.c_str(), reinterpret_cast<void*>(&path), file_load_callback, file_error_callback);
+        emscripten_async_wget_data(
+            file_str.c_str(),
+            reinterpret_cast<void*>(const_cast<std::filesystem::path*>(&path)),
+            AsyncFileReader::file_load_callback,
+            AsyncFileReader::file_fail_callback);
+
+        return {};
+    }
+
+    auto AsyncFileReader::pop(std::filesystem::path file_path [[maybe_unused]]) -> Utily::Result<std::vector<char>, Utily::Error> {
+        return Utily::Error { "Not implemented" };
+    }
+
+    void AsyncFileReader::wait_for_all() {
+        return;
     }
 
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
