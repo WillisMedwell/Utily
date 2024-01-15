@@ -41,7 +41,7 @@ namespace Utily {
         };
 
         InternalT _data[S];
-        size_t _size;
+        std::ptrdiff_t _size;
 
     public:
         using value_type = T;
@@ -51,8 +51,8 @@ namespace Utily {
             , _size(0) {
         }
 
-        [[nodiscard]] constexpr auto capacity() const noexcept -> size_t { return S; }
-        [[nodiscard]] constexpr auto size() const noexcept -> size_t { return _size; }
+        [[nodiscard]] constexpr auto capacity() const noexcept { return S; }
+        [[nodiscard]] constexpr auto size() const noexcept { return _size; }
 
         struct Iterator {
             using iterator_category = std::contiguous_iterator_tag;
@@ -268,14 +268,16 @@ namespace Utily {
             return *(begin() + static_cast<std::ptrdiff_t>(_size) - 1);
         }
 
-        constexpr void resize(std::ptrdiff_t n) noexcept {
-            assert(n > static_cast<std::ptrdiff_t>(0) && n <= S);
-            if (n > _size) [[likely]] {
-                std::uninitialized_default_construct_n(&_data[_size].data, n - _size);
-            } else if (n < _size) [[unlikely]] {
-                std::destroy_n(&_data[_size - n].data, _size - n);
+        constexpr void resize(int n) noexcept {
+            const auto nn = static_cast<std::ptrdiff_t>(n);
+            assert(n > 0 && nn <= S);
+
+            if (nn > _size) [[likely]] {
+                std::uninitialized_default_construct_n(&_data[_size].data, nn - _size);
+            } else if (nn < _size) [[unlikely]] {
+                std::destroy_n(&_data[_size - nn].data, _size - nn);
             }
-            _size = n;
+            _size = nn;
         }
     };
     // static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);
