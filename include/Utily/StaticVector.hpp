@@ -4,14 +4,13 @@
 #include <concepts>
 #include <tuple>
 #include <variant>
+#include <iostream>
 
 #include "Utily/Concepts.hpp"
 #include "Utily/TupleAlgo.hpp"
 
 namespace Utily {
     template <typename T, size_t S>
-        requires(Utily::Concepts::HasCopyConstructor<T> || Utily::Concepts::HasMoveConstructor<T>)
-        && (Utily::Concepts::HasMoveOperator<T> || Utily::Concepts::HasCopyOperator<T>)
     class StaticVector
     {
         union InternalT {
@@ -234,11 +233,20 @@ namespace Utily {
         constexpr void push_back() {
             emplace_back();
         }
+
         constexpr void push_back(const T& element) {
-            emplace_back(element);
+            if constexpr (Utily::Concepts::HasCopyConstructor<T>) {
+                emplace_back(element);
+            } else {
+                std::cerr << "Cant invoke copy constructor for the type";
+            }
         }
         constexpr void push_back(T&& element) {
-            emplace_back(std::forward<T>(element));
+            if constexpr (Utily::Concepts::HasMoveConstructor<T>) {
+                emplace_back(std::forward<T>(element));
+            } else {
+                std::cerr << "Cant invoke move constructor for the type";
+            }
         }
 
         constexpr ~StaticVector() {
