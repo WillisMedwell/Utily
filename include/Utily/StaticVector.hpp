@@ -6,12 +6,13 @@
 #include <tuple>
 #include <variant>
 #include <algorithm>
+#include <cassert>
 
 #include "Utily/Concepts.hpp"
 #include "Utily/TupleAlgo.hpp"
 
 namespace Utily {
-    template <typename T, size_t S>
+    template <typename T, std::ptrdiff_t S>
     class StaticVector
     {
         union InternalT {
