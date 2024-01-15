@@ -14,10 +14,14 @@ namespace Utily {
         constexpr Error()
             : _error(std::monostate {}) { }
 
+        constexpr Error(const std::string& message)
+            : _error(message) { }
         constexpr Error(std::string&& message)
             : _error(std::forward<std::string>(message)) { }
 
-        constexpr Error(std::string_view& message)
+        constexpr Error(const std::string_view& message)
+            : _error(message) { }
+        constexpr Error(std::string_view&& message)
             : _error(std::forward<std::string_view>(message)) { }
 
         constexpr Error(const char* message)
