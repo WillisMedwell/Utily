@@ -269,7 +269,7 @@ namespace Utily {
         }
 
         constexpr void resize(std::ptrdiff_t n) noexcept {
-            assert(n > 0 && n <= S);
+            assert(n > static_cast<std::ptrdiff_t>(0) && n <= S);
             if (n > _size) [[likely]] {
                 std::uninitialized_default_construct_n(&_data[_size].data, n - _size);
             } else if (n < _size) [[unlikely]] {
