@@ -2,9 +2,9 @@
 
 #include <array>
 #include <concepts>
+#include <iostream>
 #include <tuple>
 #include <variant>
-#include <iostream>
 
 #include "Utily/Concepts.hpp"
 #include "Utily/TupleAlgo.hpp"
@@ -217,36 +217,34 @@ namespace Utily {
         }
 
         template <typename... Args>
-            requires((!std::is_reference_v<Args>) && ...)
         constexpr void emplace_back(Args&&... args) {
-            std::construct_at(&_data[_size++].data, std::forward<Args>(args)...);
-        }
-        template <typename... Args>
-            requires((!std::is_reference_v<Args>) && ...)
-        constexpr void emplace_back(const Args&... args) {
-            std::construct_at(&_data[_size++].data, args...);
-        }
-        constexpr void emplace_back() {
-            std::construct_at(&_data[_size++].data);
+            if constexpr (std::is_constructible_v<T, Args...>) {
+                std::construct_at(&_data[_size++].data, std::forward<Args>(args)...);
+            } else {
+                static_assert(std::is_constructible_v<T, Args...>);
+            }
         }
 
         constexpr void push_back() {
             emplace_back();
         }
 
-        constexpr void push_back(const T& element) {
-            if constexpr (Utily::Concepts::HasCopyConstructor<T>) {
-                emplace_back(element);
-            } else {
-                std::cerr << "Cant invoke copy constructor for the type";
-            }
+        template <typename Arg>
+            requires(
+                !std::is_reference_v<Arg>
+                && std::same_as<T, Arg>
+                && (Utily::Concepts::HasCopyConstructor<Arg> || Utily::Concepts::HasCopyOperator<Arg>))
+        constexpr void push_back(const Arg& element) {
+            emplace_back(element);
         }
-        constexpr void push_back(T&& element) {
-            if constexpr (Utily::Concepts::HasMoveConstructor<T>) {
-                emplace_back(std::forward<T>(element));
-            } else {
-                std::cerr << "Cant invoke move constructor for the type";
-            }
+
+        template <typename Arg>
+            requires(
+                !std::is_reference_v<Arg>
+                && std::same_as<T, Arg>
+                && (Utily::Concepts::HasMoveConstructor<Arg> || Utily::Concepts::HasMoveOperator<Arg>))
+        constexpr void push_back(Arg&& element) {
+            emplace_back(std::forward<T>(element));
         }
 
         constexpr ~StaticVector() {
