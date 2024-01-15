@@ -23,7 +23,7 @@ namespace Utily {
         constexpr Error(const char* message)
             : _error(std::string_view { message }) { }
 
-        constexpr auto what() const noexcept -> const std::string_view {
+        constexpr auto what() const noexcept -> std::string_view {
             auto get_error_msg = []<typename T>(const T& error) {
                 if constexpr (std::same_as<T, std::string>) {
                     return std::string_view { error };
