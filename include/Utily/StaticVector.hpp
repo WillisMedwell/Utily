@@ -5,6 +5,7 @@
 #include <iostream>
 #include <tuple>
 #include <variant>
+#include <algorithm>
 
 #include "Utily/Concepts.hpp"
 #include "Utily/TupleAlgo.hpp"
@@ -250,9 +251,11 @@ namespace Utily {
         }
 
         constexpr ~StaticVector() {
-            for (T& element : (*this)) {
-                std::destroy_at(&element);
-            }
+            // for (T& element : (*this)) {
+            //     std::destroy_at(&element);
+            // }
+            std::destroy_n(&_data[0].data, _size);
+
             _size = 0;
         }
 
@@ -262,6 +265,16 @@ namespace Utily {
 
         [[nodiscard]] constexpr auto back() -> T& {
             return *(begin() + static_cast<std::ptrdiff_t>(_size) - 1);
+        }
+
+        constexpr void resize(std::ptrdiff_t n) noexcept {
+            assert(n > 0 && n <= S);
+            if (n > _size) [[likely]] {
+                std::uninitialized_default_construct_n(&_data[_size].data, n - _size);
+            } else if (n < _size) [[unlikely]] {
+                std::destroy_n(&_data[_size - n].data, _size - n);
+            }
+            _size = n;
         }
     };
     // static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);

@@ -177,4 +177,32 @@ TEST(StaticVector, ProperDestruction) {
         EXPECT_EQ(copy_constructions, 3);
         EXPECT_EQ(destructions, 6);
     }
+
+    { // resize basic
+        reset();
+        {
+            Utily::StaticVector<DestructorChecker, 10> sv {};
+            sv.resize(10); 
+        }
+        EXPECT_EQ(default_constructions, 10);
+        EXPECT_EQ(copy_constructions, 0);
+        EXPECT_EQ(destructions, 10);
+    }
+
+    { // resize basic
+        reset();
+        {
+            Utily::StaticVector<DestructorChecker, 10> sv {};
+            sv.resize(10); 
+            EXPECT_EQ(default_constructions, 10);
+            sv.resize(2);
+            EXPECT_EQ(destructions, 8);
+            sv.resize(6);
+            EXPECT_EQ(default_constructions, 14);
+
+        }
+        EXPECT_EQ(default_constructions, 14);
+        EXPECT_EQ(copy_constructions, 0);
+        EXPECT_EQ(destructions, 14);
+    }
 }
