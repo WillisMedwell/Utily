@@ -10,10 +10,8 @@
 
 namespace Utily {
     template <typename T, size_t S>
-        requires Utily::Concepts::HasCopyConstructor<T>
-        && Utily::Concepts::HasMoveConstructor<T>
-        && Utily::Concepts::HasMoveOperator<T>
-        && Utily::Concepts::HasCopyOperator<T>
+        requires(Utily::Concepts::HasCopyConstructor<T> || Utily::Concepts::HasMoveConstructor<T>)
+        && (Utily::Concepts::HasMoveOperator<T> || Utily::Concepts::HasCopyOperator<T>)
     class StaticVector
     {
         union InternalT {
@@ -196,7 +194,7 @@ namespace Utily {
         [[nodiscard]] constexpr auto begin() const noexcept -> ConstIterator { return ConstIterator { &_data[0] }; }
 
         template <typename... Args>
-            requires ((!std::is_reference_v<Args>) && ...)
+            requires((!std::is_reference_v<Args>) && ...)
         constexpr StaticVector(Args&&... args) {
             static_assert(sizeof(InternalT) == sizeof(T), "Should be unreachable");
             static_assert(sizeof...(Args) <= S, "Increase the inital size of the StaticVector");
@@ -220,15 +218,15 @@ namespace Utily {
         }
 
         template <typename... Args>
-            requires ((!std::is_reference_v<Args>) && ...)
+            requires((!std::is_reference_v<Args>) && ...)
         constexpr void emplace_back(Args&&... args) {
             std::construct_at(&_data[_size++].data, std::forward<Args>(args)...);
         }
-        template<typename... Args>
-             requires ((!std::is_reference_v<Args>) && ...)
+        template <typename... Args>
+            requires((!std::is_reference_v<Args>) && ...)
         constexpr void emplace_back(const Args&... args) {
             std::construct_at(&_data[_size++].data, args...);
-        } 
+        }
         constexpr void emplace_back() {
             std::construct_at(&_data[_size++].data);
         }
