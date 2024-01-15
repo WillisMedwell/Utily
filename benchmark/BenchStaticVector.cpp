@@ -29,7 +29,7 @@ BENCHMARK(BM_StaticVector_PushBack);
 static void BM_StaticVector_Iterate(benchmark::State& state) {
     Utily::StaticVector<T, N> v;
     for (auto i = 0; i < N; ++i) {
-        v.push_back(T{ i });
+        v.push_back({ i });
     }
     for (auto _ : state) {
         for (auto& x : v) {

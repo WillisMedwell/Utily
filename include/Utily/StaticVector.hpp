@@ -229,7 +229,8 @@ namespace Utily {
             emplace_back();
         }
 
-        template <typename Arg>
+        // Hack to allow types that don't have copy operations to still be valid.
+        template <typename Arg = T>
             requires(
                 !std::is_reference_v<Arg>
                 && std::same_as<T, Arg>
@@ -238,7 +239,8 @@ namespace Utily {
             emplace_back(element);
         }
 
-        template <typename Arg>
+        // Hack to allow types that don't have move operations to still be valid.
+        template <typename Arg = T>
             requires(
                 !std::is_reference_v<Arg>
                 && std::same_as<T, Arg>
