@@ -34,9 +34,9 @@ namespace Utily {
             } else if constexpr (std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>) {
                 static_assert(std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>, "Obscure move constructor.");
             } else if constexpr (std::is_constructible_v<Value, Arg&&>) {
-                std::construct_at(&_result, std::forward<Arg>(arg));
+                std::construct_at(&_result, Value{arg});
             } else if constexpr (std::is_constructible_v<Error, Arg&&>) {
-                std::construct_at(&_result, std::forward<Arg>(arg));
+                std::construct_at(&_result, Error{arg});
             } 
         }
 
@@ -52,9 +52,9 @@ namespace Utily {
             } else if constexpr (std::is_constructible_v<Value, const Arg&> && std::is_constructible_v<Error, const Arg&>) {
                 static_assert(std::is_constructible_v<Value, const Arg&> && std::is_constructible_v<Error, const Arg&>, "Obscure copy constructor.");
             } else if constexpr (std::is_constructible_v<Value, const Arg&>) {
-                std::construct_at(&_result, arg);
+                std::construct_at(&_result, Value{arg});
             } else if constexpr (std::is_constructible_v<Error, const Arg&>) {
-                std::construct_at(&_result, arg);
+                std::construct_at(&_result, Error{arg});
             }
         }
 
