@@ -57,6 +57,7 @@ namespace Utily {
         struct Iterator {
             using iterator_category = std::contiguous_iterator_tag;
             using value_type = T;
+            using element_type = T;
             using difference_type = std::ptrdiff_t;
             using pointer = T*;
             using reference = T&;
@@ -125,6 +126,7 @@ namespace Utily {
         struct ConstIterator {
             using iterator_category = std::contiguous_iterator_tag;
             using value_type = T;
+            using element_type = T;
             using difference_type = std::ptrdiff_t;
             using pointer = const T*;
             using reference = const T&;
@@ -270,7 +272,7 @@ namespace Utily {
 
         constexpr void resize(int n) noexcept {
             const auto nn = static_cast<std::ptrdiff_t>(n);
-            assert(n > 0 && nn <= S);
+            assert(n >= 0 && nn <= S);
 
             if (nn > _size) [[likely]] {
                 std::uninitialized_default_construct_n(&_data[_size].data, nn - _size);
@@ -280,10 +282,10 @@ namespace Utily {
             _size = nn;
         }
     };
-    // static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);
-    // static_assert(std::contiguous_iterator<StaticVector<int, 10>::ConstIterator>);
-    // static_assert(std::ranges::range<StaticVector<int, 10>>);
-    // static_assert(std::ranges::sized_range<StaticVector<int, 10>>);
-    // static_assert(std::ranges::contiguous_range<StaticVector<int, 10>>);
-    // static_assert(std::ranges::common_range<StaticVector<int, 10>>);
+    static_assert(std::contiguous_iterator<StaticVector<int, 10>::Iterator>);
+    static_assert(std::contiguous_iterator<StaticVector<int, 10>::ConstIterator>);
+    static_assert(std::ranges::range<StaticVector<int, 10>>);
+    static_assert(std::ranges::sized_range<StaticVector<int, 10>>);
+    static_assert(std::ranges::contiguous_range<StaticVector<int, 10>>);
+    static_assert(std::ranges::common_range<StaticVector<int, 10>>);
 }
