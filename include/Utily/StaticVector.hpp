@@ -277,7 +277,7 @@ namespace Utily {
             if (nn > _size) [[likely]] {
                 std::uninitialized_default_construct_n(&_data[_size].data, nn - _size);
             } else if (nn < _size) [[unlikely]] {
-                std::destroy_n(&_data[_size - nn].data, _size - nn);
+                std::destroy_n(&_data[_size - nn - 1].data, _size - nn);
             }
             _size = nn;
         }
