@@ -31,9 +31,13 @@ namespace Utily {
             } else if constexpr (std::same_as<Arg, Error>) {
                 static_assert(Utily::Concepts::HasMoveConstructor<Error>, "Result Error type has no move constructor");
                 std::construct_at(&_result, std::forward<Error>(arg));
-            } else {
-                static_assert(std::same_as<Arg, Error> || std::same_as<Arg, Value>, "Obscure move constructor.");
-            }
+            } else if constexpr (std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>) {
+                static_assert(std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>, "Obscure move constructor.");
+            } else if constexpr (std::is_constructible_v<Value, Arg&&>) {
+                std::construct_at(&_result, std::forward<Arg>(arg));
+            } else if constexpr (std::is_constructible_v<Error, Arg&&>) {
+                std::construct_at(&_result, std::forward<Arg>(arg));
+            } 
         }
 
         template <typename Arg>
@@ -45,8 +49,12 @@ namespace Utily {
             } else if constexpr (std::same_as<Arg, Error>) {
                 static_assert(Utily::Concepts::HasCopyConstructor<Error>, "Result Error type has no copy constructor");
                 std::construct_at(&_result, arg);
-            } else {
-                static_assert(std::same_as<Arg, Error> || std::same_as<Arg, Value>, "Obscure copy constructor");
+            } else if constexpr (std::is_constructible_v<Value, const Arg&> && std::is_constructible_v<Error, const Arg&>) {
+                static_assert(std::is_constructible_v<Value, const Arg&> && std::is_constructible_v<Error, const Arg&>, "Obscure copy constructor.");
+            } else if constexpr (std::is_constructible_v<Value, const Arg&>) {
+                std::construct_at(&_result, arg);
+            } else if constexpr (std::is_constructible_v<Error, const Arg&>) {
+                std::construct_at(&_result, arg);
             }
         }
 
@@ -129,8 +137,6 @@ namespace Utily {
             }
             return *this;
         }
-
-        
     };
 
     template <typename Error>
