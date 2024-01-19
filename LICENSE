@@ -7,7 +7,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 Inclusion of Copyright Notice and Permission Notice: All copies, substantial portions, or derivative works of the Software must include the above copyright notice, this list of conditions, and the following disclaimer.
 
 Attribution Requirements:
-2.1 Content: The user must include an attribution statement in their project using the Software. This must contain the name "Utily", the original author's name or entity, and a direct link to the original repository of "Utily"
+2.1 Content: The user must include an attribution statement in their project using the Software. This must contain the name "Utily", the original author's name or entity, and a direct link to the original repository of "Utily" which is https://github.com/WillisMedwell/Utily
 2.2 Location: The attribution must be prominently displayed in the README.md file of the user's project repository.
 2.3 Format: The attribution statement must be the same font size as the main body text of the README.md file with a clickable link to the original repository of "Utily" within a markdown viewer.
 2.4 Verification: Users must notify the original author or entity with a link to the repository for verification of the attribution.
