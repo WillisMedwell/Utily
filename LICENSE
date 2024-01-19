@@ -7,14 +7,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 Inclusion of Copyright Notice and Permission Notice: All copies, substantial portions, or derivative works of the Software must include the above copyright notice, this list of conditions, and the following disclaimer.
 
 Attribution Requirements:
-
 2.1 Content: The user must include an attribution statement in their project using the Software. This must contain the name "Utily", the original author's name or entity, and a direct link to the original repository of "Utily" which is https://github.com/WillisMedwell/Utily
 2.2 Location: The attribution must be prominently displayed in the README.md file of the user's project repository.
 2.3 Format: The attribution statement must be the same font size as the main body text of the README.md file with a clickable link to the original repository of "Utily" within a markdown viewer.
 2.4 Example: An example would be "[Utily](https://github.com/WillisMedwell/Utily). *Created by Willis Medwell, which is licensed under a Modified MIT License.*" or "This project makes use of the [Utily](https://github.com/WillisMedwell/Utily) library created by Willis Medwell"
 
 Consequences for Non-Compliance:
-
 3.1 Revocation of License: Failure to comply with the above terms will result in immediate revocation of this license.
 3.2 Legal Action: Continued use after revocation, or serious breaches (like unauthorized distribution), may lead to legal action under Australian law.
 3.3 Reinstatement: License reinstatement is at the discretion of the original author or entity and requires demonstrated compliance and possible additional conditions.
