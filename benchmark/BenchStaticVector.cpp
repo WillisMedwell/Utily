@@ -14,6 +14,8 @@ static void BM_StaticVector_Construct(benchmark::State& state) {
 }
 BENCHMARK(BM_StaticVector_Construct);
 
+
+
 static void BM_StaticVector_PushBack(benchmark::State& state) {
     for (auto _ : state) {
         state.PauseTiming();
@@ -72,7 +74,6 @@ static void BM_Vector_Iterate(benchmark::State& state) {
 }
 BENCHMARK(BM_Vector_Iterate);
 
-#if 0
 static void BM_Array_Construct(benchmark::State& state) {
     for (auto _ : state) {
         std::array<T, N> a;
@@ -105,4 +106,3 @@ static void BM_Array_Iterate(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Array_Iterate);
-#endif

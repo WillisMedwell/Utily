@@ -20,7 +20,7 @@ namespace Utily {
             T data;
 
             constexpr InternalT()
-                : dummy({}) { }
+                : dummy({}) { } 
 
             constexpr InternalT(const T& t)
                 : data(t) { }
@@ -36,7 +36,6 @@ namespace Utily {
                 data = other;
                 return *this;
             }
-
             constexpr ~InternalT() { }
         };
 
@@ -258,8 +257,7 @@ namespace Utily {
             //     std::destroy_at(&element);
             // }
             std::destroy_n(&_data[0].data, _size);
-
-            _size = 0;
+            //_size = 0;
         }
 
         [[nodiscard]] constexpr auto front() -> T& {

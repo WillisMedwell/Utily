@@ -35,5 +35,6 @@ namespace Utily {
         static auto push(std::filesystem::path file_path) -> Utily::Result<void, Utily::Error>;
         static auto pop(std::filesystem::path file_path) -> Utily::Result<std::vector<char>, Utily::Error>;
         static void wait_for_all();
+        static auto wait_pop(std::filesystem::path file_path) -> Utily::Result<std::vector<char>, Utily::Error>;
     };
 }

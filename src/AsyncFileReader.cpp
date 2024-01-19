@@ -9,7 +9,6 @@
 #include <iostream>
 #include <span>
 
-
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 #error "not implemented unix/apple system"
 #endif
@@ -19,7 +18,15 @@ namespace Utily {
     using FileHandle = HANDLE;
 
     struct AsyncFileReader::FileDataUnfulfilled {
+    private:
         FileHandle stream = nullptr;
+
+    public:
+
+        auto get_stream() -> FileHandle& {
+            return stream;
+        }
+
         std::vector<char> contents;
         OVERLAPPED overlapped;
 
@@ -33,7 +40,7 @@ namespace Utily {
             , overlapped(std::exchange(other.overlapped, OVERLAPPED {})) { }
 
         ~FileDataUnfulfilled() {
-            if (stream) {
+            if (stream != nullptr) {
                 CloseHandle(stream);
                 stream = nullptr;
             }
@@ -63,7 +70,7 @@ namespace Utily {
 
         FileDataUnfulfilled file_data {};
 
-        file_data.stream = CreateFile(
+        file_data.get_stream() = CreateFile(
             file_str.c_str(),
             GENERIC_READ,
             FILE_SHARE_READ,
@@ -72,7 +79,8 @@ namespace Utily {
             FILE_FLAG_OVERLAPPED,
             nullptr);
 
-        if (file_data.stream == INVALID_HANDLE_VALUE) {
+        if (file_data.get_stream() == INVALID_HANDLE_VALUE) {
+            file_data.get_stream() = nullptr;
             return Utily::Error {
                 std::format(
                     "File \"{}\" does not exist.",
@@ -80,7 +88,7 @@ namespace Utily {
             };
         }
 
-        if (LARGE_INTEGER temp; !GetFileSizeEx(file_data.stream, &temp)) {
+        if (LARGE_INTEGER temp; !GetFileSizeEx(file_data.get_stream(), &temp)) {
             return Utily::Error {
                 std::format(
                     "File \"{}\" did not allow us to read the file's size.",
@@ -104,14 +112,15 @@ namespace Utily {
         auto& [path, file_data_ref] = *iter;
 
         bool has_started_reading = ReadFileEx(
-            file_data_ref.stream,
+            file_data_ref.get_stream(),
             file_data_ref.contents.data(),
             static_cast<DWORD>(file_data_ref.contents.size()),
             &file_data_ref.overlapped,
             nullptr);
 
         if (!has_started_reading) {
-            CloseHandle(file_data_ref.stream);
+            CloseHandle(file_data_ref.get_stream());
+            file_data_ref.get_stream() = nullptr;
             files_unfulfilled.erase(iter);
             return Utily::Error {
                 std::format(
@@ -148,11 +157,27 @@ namespace Utily {
     void AsyncFileReader::wait_for_all() {
         for (auto& [path, file_data] : files_unfulfilled) {
             DWORD bytes_transferreed;
-            GetOverlappedResult(file_data.stream, &file_data.overlapped, &bytes_transferreed, true);
-            CloseHandle(file_data.stream);
+            GetOverlappedResult(file_data.get_stream(), &file_data.overlapped, &bytes_transferreed, true);
+            CloseHandle(file_data.get_stream());
+            file_data.get_stream() = nullptr;
             files_fulfilled.emplace(path, std::move(file_data.contents));
         }
         files_unfulfilled.clear();
+    }
+
+    auto AsyncFileReader::wait_pop(std::filesystem::path file_path) -> Utily::Result<std::vector<char>, Utily::Error> {
+        if (files_unfulfilled.contains(file_path)) {
+            DWORD bytes_transferreed;
+            auto& file_data = files_unfulfilled[file_path];
+            GetOverlappedResult(file_data.get_stream(), &file_data.overlapped, &bytes_transferreed, true);
+            
+            CloseHandle(file_data.get_stream());
+            file_data.get_stream() = nullptr;
+            auto contents = std::move(file_data.contents);
+            files_unfulfilled.erase(file_path);
+            return contents;
+        }
+        return pop(file_path);
     }
 
 #elif defined(__EMSCRIPTEN__) || defined(EMSCRIPTEN)
@@ -206,4 +231,5 @@ namespace Utily {
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 
 #endif
+
 }

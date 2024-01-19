@@ -44,10 +44,6 @@ static void BM_Std_FileReader(benchmark::State& state) {
 
         benchmark::DoNotOptimize(a);
         benchmark::DoNotOptimize(b);
-
-        /*for (auto i = 0; i < UINT16_MAX; ++i) {
-            benchmark::DoNotOptimize(i);
-        }*/
     }
 }
 BENCHMARK(BM_Std_FileReader);

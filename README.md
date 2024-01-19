@@ -3,7 +3,7 @@
 
 In addition the library is **optimised for Windows, Emscripten**, and Linux too.
 
-## API Contents
+## Library Contents
 
 ```c++
 namespace Utily {
@@ -52,7 +52,7 @@ namespace Utily {
 
 ```
 
-## API Usage
+## Examples
 
 <details><summary><b>Utily::Error</b></summary>
 
@@ -280,7 +280,7 @@ constexpr auto to_array(Args&&... args)
 
 </details>
 
-## Installation
+## Get Started
 
 <details><summary><b>Modern CMake</b></summary>
 Using Modern cmake features means that we can use CMake as a dependency manager relatively easily.
