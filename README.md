@@ -7,34 +7,36 @@ In addition the library is **optimised for Windows, Emscripten**, and Linux too.
 
 ```c++
 namespace Utily {
-    /* Types & Data-Structures. */
-    class Error;    // TOTEST
-    class Result;   // TOTEST
+    class Error;    
+    class Result;   
     class StaticVector<T, S>;
 
-    /* Operating-System Optimised. (including Emscripten) */
-    class AsyncFileReader;    // TODO EMSCRIPTEN & LINUX & TOTEST
+    static class InlineArrays {
+        static alloc_uninit<T1, T2,...>(s1, s2,...);
+        static alloc_default<T1, T2, ...>(s1, s2, ...);
+        static alloc_copy<T1, T2>(R1 range1, R2 range2);
+    };
 
-    /* Iterator Adaptors. */
+    // class AsyncFileReader;   
+
     namespace Split {
         class ByElement;
         class ByElements;
-        class ByRange;      // TODO & TOTEST
-        class ByRanges;     // TODO & TOTEST
+        // class ByRange;      
+        // class ByRanges;     
     }
     auto split(range, auto...); 
 
-    /* Algorithms. */
     namespace TupleAlgo {
-        void for_each(tuple, pred);         // TOTEST
-        void copy(tuple, iter);             // TOTEST
-        void transform(tuple, iter, pred);  // TODO & TOTEST
-        auto reduce(tuple, init, pred);     // TODO & TOTEST
+        void for_each(tuple, pred);
+        void copy(tuple, iter);
+        // void transform(tuple, iter, pred);  
+        // auto reduce(tuple, init, pred);     
     }   
 
-    namespace Reflection {
-        auto get_name<T>(); // TODO & TOTEST
-    }
+    // namespace Reflection {
+    //     auto get_name<T>(); 
+    // }
 
     namespace Concepts {
         concept HasMoveConstructor<T>;
@@ -97,6 +99,37 @@ auto result = do_thing()
 // Style 3.
 auto result = do_thing()
     .on_either(print_value, print_error);
+```
+
+---
+
+</details>
+
+<details><summary><b>Utily::InlineArrays</b></summary>
+An allocator that will pack arrays together for optimal memory access.
+
+```C++
+using ReturnType = std::tuple<
+    std::unique_ptr<byte[]>, 
+    std::span<int>, 
+    std::span<bool>
+>;
+// the spans elements will have uninitialised memory so be careful.
+ReturnType uninitialised = Utily::InlineArrays::alloc_uninit<int, bool>(5, 10);
+```
+```C++
+// the spans elements will be defaulted constructed. 
+// also structured bindings are good.
+auto [data, ints, bools] = Utily::InlineArrays::alloc_default<int, bool>(10, 10);
+```
+```C++
+auto a = std::to_array<int>({1, 2, 3, 4});
+auto b = std::vector<bool>{true, false, true, false};
+auto c = Utily::StaticVector<char, 10>{'a', 'b', 'c'};
+
+auto [data1, ints1, bools1] = Utily::InlineArrays::alloc_copy<int, bool, char>(a, b, c);
+// can also deduce types from the ranges.
+auto [data2, ints2, bools2] = Utily::InlineArrays::alloc_copy(a, b, c);    
 ```
 
 ---

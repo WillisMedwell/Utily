@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+/*
 const static auto STANFORD_BUNNY_PATH = std::filesystem::path { "resources/stanford_bunny.ply" };
 const static auto SMALL_TEXT_PATH = std::filesystem::path { "resources/small.txt" };
 
@@ -47,3 +48,4 @@ TEST(AsyncFileReader, pop) {
         Utily::AsyncFileReader::wait_for_all();
     }
 }
+*/

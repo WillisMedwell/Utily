@@ -52,7 +52,7 @@ namespace Utily {
         }
 
         [[nodiscard]] constexpr auto capacity() const noexcept { return S; }
-        [[nodiscard]] constexpr auto size() const noexcept { return _size; }
+        [[nodiscard]] constexpr auto size() const noexcept -> size_t { return static_cast<size_t>(_size); }
 
         struct Iterator {
             using iterator_category = std::contiguous_iterator_tag;

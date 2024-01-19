@@ -57,17 +57,17 @@ namespace Utily {
 
         // template<typename , typename
 
-        template <typename T, typename Param>
-        concept IsCallableWith = requires(T t, Param param) {
+        template <typename T, typename... Param>
+        concept IsCallableWith = requires(T t, Param... param) {
             {
-                t(param)
+                t(param...)
             };
         };
 
-        template <typename T, typename Param>
-        concept IsConstCallableWith = requires(T t, const Param& param) {
+        template <typename T, typename... Param>
+        concept IsConstCallableWith = requires(T t, const Param&... param) {
             {
-                t(param)
+                t(param...)
             };
         };
     }

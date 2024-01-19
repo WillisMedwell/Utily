@@ -8,3 +8,4 @@
 #include "Utily/ErrorHandler.hpp"
 #include "Utily/Result.hpp"
 #include "Utily/AsyncFileReader.hpp"
+#include "Utily/InlineArrays.hpp"

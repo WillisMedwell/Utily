@@ -6,7 +6,7 @@ namespace Utily {
     namespace TupleAlgo {
         template <typename Tuple, typename Pred, size_t Index = 0>
             requires(!std::is_reference_v<Tuple>)
-        constexpr auto for_each(const Tuple& tuple, Pred& pred) -> void {
+        constexpr auto for_each(Tuple& tuple, Pred pred) -> void {
             if constexpr (Index == std::tuple_size_v<Tuple>) {
                 return;
             } else if constexpr (Utily::Concepts::IsCallableWith<Pred, std::tuple_element_t<Index, Tuple>>) {
@@ -19,7 +19,7 @@ namespace Utily {
 
         template <typename Tuple, typename Pred, size_t Index = 0>
             requires(!std::is_reference_v<Tuple>)
-        constexpr auto for_each(Tuple&& tuple, Pred& pred) -> void {
+        constexpr auto for_each(Tuple&& tuple, Pred pred) -> void {
             if constexpr (Index == std::tuple_size_v<Tuple>) {
                 return;
             } else if constexpr (Utily::Concepts::IsCallableWith<Pred, std::tuple_element_t<Index, Tuple>>) {
