@@ -11,7 +11,8 @@ namespace Utily {
     class Result;   
     class StaticVector<T, S>;
 
-    static class InlineArrays {
+    
+    static non-constexpr class InlineArrays {
         static alloc_uninit<T1, T2,...>(s1, s2,...);
         static alloc_default<T1, T2, ...>(s1, s2, ...);
         static alloc_copy<T1, T2>(R1 range1, R2 range2);
