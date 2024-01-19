@@ -1,0 +1,23 @@
+Utily - Modified MIT License
+
+Copyright (c) 2023 Willis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of "Utily" (the "Software") and associated documentation files, to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+Inclusion of Copyright Notice and Permission Notice: All copies, substantial portions, or derivative works of the Software must include the above copyright notice, this list of conditions, and the following disclaimer.
+
+Attribution Requirements:
+
+2.1 Content: The user must include an attribution statement in their project using the Software. This must contain the name "Utily", the original author's name or entity, and a direct link to the original repository of "Utily"
+2.2 Location: The attribution must be prominently displayed in the README.md file of the user's project repository.
+2.3 Format: The attribution statement must be the same font size as the main body text of the README.md file with a clickable link to the original repository of "Utily" within a markdown viewer.
+2.4 Verification: Users must notify the original author or entity with a link to the repository for verification of the attribution.
+Consequences for Non-Compliance:
+
+3.1 Revocation of License: Failure to comply with the above terms will result in immediate revocation of this license.
+3.2 Legal Action: Continued use after revocation, or serious breaches (like unauthorized distribution), may lead to legal action under Australian law.
+3.3 Reinstatement: License reinstatement is at the discretion of the original author or entity and requires demonstrated compliance and possible additional conditions.
+Jurisdiction and Governing Law: This license and any disputes arising from it are governed by the laws of Australia. Any legal actions related to this license must be brought in the courts located in Australia.
+
+DISCLAIMER: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
