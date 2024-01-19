@@ -304,3 +304,18 @@ In the future, I would like to have Utily:: supported by package managers like v
 
 </details>
 
+<details><summary><b>Conditions</b></summary>
+
+I think its fair to recognise the use of other people's libraries and code; I strive to do my best to recognise other people's contribution and work. 
+
+If you use this library in a public repo, I would appreciate a link to my repo to let others know!
+
+```md
+This project makes use of the [Utily](https://github.com/WillisMedwell/Utily) library *created by Willis Medwell.*
+```
+
+---
+
+</details>
+
+
