@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <ranges>
 
+#if 0
+
 const static auto STANFORD_BUNNY_PATH = std::filesystem::path { "resources/stanford_bunny.ply" };
 const static auto SMALL_TEXT_PATH = std::filesystem::path { "resources/small.txt" };
 
@@ -153,5 +155,7 @@ static void BM_Win32_FileMappingReader(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Win32_FileMappingReader);
+
+#endif
 
 #endif

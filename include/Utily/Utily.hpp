@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Utily/Concepts.hpp"
+#include "UTily/Simd.hpp"
 #include "Utily/TupleAlgo.hpp"
 #include "Utily/Split.hpp"
 #include "Utily/StaticVector.hpp"

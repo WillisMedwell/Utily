@@ -4,6 +4,7 @@
 
 #include <ranges>
 
+#if 0
 constexpr static std::string_view LONG_STRING = "The quick brown fox jumps over the lazy dog while the energetic and spirited puppies, intrigued by the sudden burst of activity, start chasing their own tails, causing a delightful commotion in the serene and peaceful meadow that has, until now, been undisturbed by such playful endeavors";
 
 static void BM_Utily_SplitByElement(benchmark::State& state) {
@@ -34,3 +35,5 @@ static void BM_Std_SplitByElement(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Std_SplitByElement);
+
+#endif

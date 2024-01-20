@@ -18,6 +18,10 @@ namespace Utily {
         static alloc_copy<T1, T2>(R1 range1, R2 range2);
     };
 
+    namespace Simd {
+        iter find(iter, iter, value) // currently only support bytes (aka char & unsigned char)  
+    }
+
     // class AsyncFileReader;   
 
     namespace Split {
