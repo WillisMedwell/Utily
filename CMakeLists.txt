@@ -21,7 +21,9 @@ if(NOT MSVC)
     # Enable all the warnings.
     target_compile_options(Utily_Utily PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
     # For std::format.
-    target_compile_options(Utily_Utily PRIVATE "-fexperimental-library")
+    target_compile_options(Utily_Utily PRIVATE -fexperimental-library)
+    target_compile_options(Utily_Utily PUBLIC -mavx2 -mavx512bw)
+
 endif()
 
 set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)
