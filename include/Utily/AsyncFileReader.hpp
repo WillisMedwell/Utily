@@ -14,7 +14,7 @@
 #include "Utily/Error.hpp"
 #include "Utily/Result.hpp"
 
-
+#if 0
 
 namespace Utily {
     class AsyncFileReader
@@ -38,3 +38,5 @@ namespace Utily {
         static auto wait_pop(std::filesystem::path file_path) -> Utily::Result<std::vector<char>, Utily::Error>;
     };
 }
+
+#endif

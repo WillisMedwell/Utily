@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstring>
 #include <array>
 #include <bit>
 #include <bitset>
@@ -25,7 +26,7 @@ namespace Utily {
             requires std::equality_comparable_with<Delim, std::ranges::range_value_t<Container>> && (!std::is_reference_v<Container>)
         class ByElement
         {
-            using ContainerIter = Container::const_iterator;
+            using ContainerIter = typename Container::const_iterator;
             using ContainerValue = std::ranges::range_value_t<Container>;
 
             const Container& _container;
@@ -101,12 +102,14 @@ namespace Utily {
             using const_iterator = Iterator;
 
             [[nodiscard]] constexpr auto begin() const noexcept {
-                return ++Iterator {
+                Iterator iter {
                     .current_begin = _container.cbegin(),
                     .current_end = _container.cbegin(),
                     .end = _container.cend(),
                     .delim = _delim
                 };
+                ++iter;
+                return iter;
             }
             [[nodiscard]] constexpr auto end() const noexcept {
                 return Iterator {
@@ -132,7 +135,7 @@ namespace Utily {
         class ByElements
         {
         private:
-            using ContainerIter = Container::const_iterator;
+            using ContainerIter = typename Container::const_iterator;
             using ContainerValue = std::ranges::range_value_t<Container>;
             using Delims = std::array<Delim, S>;
             const Container& _container;

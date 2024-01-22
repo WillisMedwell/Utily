@@ -9,9 +9,13 @@
 #include <iostream>
 #include <span>
 
+
+
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-#error "not implemented unix/apple system"
+//#error "not implemented unix/apple system"
 #endif
+
+#if 0
 
 namespace Utily {
 #if defined(_WIN32)
@@ -239,3 +243,5 @@ namespace Utily {
 #endif
 
 }
+
+#endif

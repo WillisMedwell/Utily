@@ -1,0 +1,50 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 11,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "gcc-ninja",
+            "description": "Build with GCC and Ninja",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/gcc-ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_UTILY_TESTS": "ON",
+                "BUILD_UTILY_BENCHMARKS": "ON"
+            },
+            "environment": {
+                "CC": "gcc",
+                "CXX": "g++"
+            }
+        },
+        {
+            "name": "clang-ninja",
+            "description": "Build with Clang and Ninja",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/clang-ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_UTILY_TESTS": "ON",
+                "BUILD_UTILY_BENCHMARKS": "ON"
+            },
+            "environment": {
+                "CC": "clang",
+                "CXX": "clang++"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "gcc-ninja",
+            "configurePreset": "gcc-ninja"
+        },
+        {
+            "name": "clang-ninja",
+            "configurePreset": "clang-ninja"
+        }
+    ]
+}
