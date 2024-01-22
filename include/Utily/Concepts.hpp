@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <ranges>
 
 namespace Utily {
     namespace Concepts {
@@ -44,7 +45,7 @@ namespace Utily {
             std::ranges::contiguous_range<T> && std::ranges::sized_range<T> && requires(T a) {
                 { std::ranges::data(a) } -> std::contiguous_iterator;
             };
-            
+
         static_assert(IsContiguousRange<std::string>);
         static_assert(!IsContiguousRange<std::list<int>>);
 
@@ -62,6 +63,11 @@ namespace Utily {
             {
                 t(param...)
             };
+        };
+
+        template <typename Iter>
+        concept SubrangeCompatible = std::contiguous_iterator<Iter> && requires(Iter a, Iter b) {
+            { std::ranges::subrange(a, b) } -> std::convertible_to<std::ranges::subrange<Iter>>;
         };
     }
 

@@ -20,10 +20,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy DESTINATION ${CMAKE_CURRENT_BI
 if(DEFINED EMSCRIPTEN)
     message(STATUS "For Emscripten SIMD use flags: \"-msimd128 -mrelaxed-simd -msse -msse2 -mavx\"")
 elseif(NOT MSVC)
-    # Enable all the warnings.
     target_compile_options(Utily_Utily PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
-    # For std::format.
-    # target_compile_options(Utily_Utily PRIVATE -fexperimental-library)
     message(STATUS "For Native SIMD use flags: \"-mavx2 -mavx512bw\"")
 endif()
 
@@ -74,12 +71,15 @@ if(BUILD_UTILY_BENCHMARKS)
     find_package(benchmark CONFIG)
     if(NOT benchmark_FOUND)
         message(STATUS "Downloading Benchmark...")
+
         FetchContent_Declare(
             benchmark
             GIT_REPOSITORY https://github.com/google/benchmark
             GIT_TAG main
             GIT_SHALLOW FALSE
         )
+        
+        set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable Google Benchmark tests" FORCE)
         FetchContent_MakeAvailable(benchmark)
     endif()
     add_executable(UtilyBenchmark ${UTILY_BENCHMARK_SOURCES})

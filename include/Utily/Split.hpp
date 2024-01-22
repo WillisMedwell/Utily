@@ -1,11 +1,10 @@
 #pragma once
 
 #include <algorithm>
-#include <cstring>
 #include <array>
 #include <bit>
 #include <bitset>
-#include <emmintrin.h>
+#include <cstring>
 #include <execution>
 #include <iterator>
 #include <numeric>
@@ -15,8 +14,8 @@
 #include <type_traits>
 #include <utility>
 
-#include <Utily/Simd.hpp>
 #include <Utily/Concepts.hpp>
+#include <Utily/Simd.hpp>
 
 namespace Utily {
 
@@ -26,7 +25,7 @@ namespace Utily {
             requires std::equality_comparable_with<Delim, std::ranges::range_value_t<Container>> && (!std::is_reference_v<Container>)
         class ByElement
         {
-            using ContainerIter = typename Container::const_iterator;
+            using ContainerIter = decltype(std::ranges::cbegin(std::declval<Container&>()));
             using ContainerValue = std::ranges::range_value_t<Container>;
 
             const Container& _container;
@@ -38,6 +37,17 @@ namespace Utily {
                 , _delim(delim) { }
 
             ByElement(Container&& container, const Delim& delim) = delete;
+
+            struct IterWrapper {
+                ContainerIter _begin;
+                ContainerIter _end;
+                auto begin() -> ContainerIter& {
+                    return _begin;
+                }
+                auto end() -> ContainerIter& {
+                    return _begin;
+                }
+            };
 
             struct Iterator {
             public:
@@ -69,12 +79,14 @@ namespace Utily {
             private:
                 // purely for type deduction
                 consteval static auto dereference_type() {
-                    if constexpr (std::same_as<ContainerValue, char>) {
+                    if constexpr (std::same_as<ContainerValue, char> && Utily::Concepts::IsContiguousRange<Container>) {
                         return std::string_view {};
                     } else if constexpr (Utily::Concepts::IsContiguousRange<Container>) {
                         return std::span<const ContainerValue> {};
-                    } else {
+                    } else if constexpr (Utily::Concepts::SubrangeCompatible<ContainerIter>) {
                         return std::ranges::subrange<ContainerIter, ContainerIter> {};
+                    } else {
+                        return IterWrapper {};
                     }
                 }
                 using DereferenceType = std::decay_t<decltype(dereference_type())>;
@@ -146,6 +158,17 @@ namespace Utily {
                 : _container(container)
                 , _delims(delims) { }
 
+            struct IterWrapper {
+                ContainerIter _begin;
+                ContainerIter _end;
+                auto begin() -> ContainerIter& {
+                    return _begin;
+                }
+                auto end() -> ContainerIter& {
+                    return _begin;
+                }
+            };
+
             struct Iterator {
             public:
                 ContainerIter current_begin;
@@ -174,16 +197,18 @@ namespace Utily {
 
             private:
                 // purely for type deduction
-                consteval static auto deference_type() {
-                    if constexpr (std::same_as<ContainerValue, char>) {
+                consteval static auto dereference_type() {
+                    if constexpr (std::same_as<ContainerValue, char> && Utily::Concepts::IsContiguousRange<Container>) {
                         return std::string_view {};
                     } else if constexpr (Utily::Concepts::IsContiguousRange<Container>) {
                         return std::span<const ContainerValue> {};
-                    } else {
+                    } else if constexpr (Utily::Concepts::SubrangeCompatible<ContainerIter>) {
                         return std::ranges::subrange<ContainerIter, ContainerIter> {};
+                    } else {
+                        return IterWrapper {};
                     }
                 }
-                using DerefenceType = decltype(deference_type());
+                using DerefenceType = decltype(dereference_type());
 
             public:
                 [[nodiscard]] constexpr auto operator*() const noexcept {

@@ -226,14 +226,14 @@ namespace Utily::Simd::Details {
 
         const size_t max_i_clamped = src_size - (src_size % chars_per_vec);
 
-        std::array<__m128i, max_values> vs;
+        __m128i vs[max_values];
         for (size_t i = 0; i < value_size; ++i) {
             vs[i] = _mm_set1_epi8(value_begin[i]);
         }
 
         for (size_t i = 0; i < max_i_clamped; i += chars_per_vec) {
             const __m128i c = _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i));
-            std::array<__m128i, max_values> eqs;
+            __m128i eqs[max_values];
             for (size_t ii = 0; ii < value_size; ++ii) {
                 eqs[ii] = _mm_cmpeq_epi8(c, vs[ii]);
             }
@@ -251,7 +251,7 @@ namespace Utily::Simd::Details {
 
         memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
 
-        std::array<__m128i, max_values> eqs;
+        __m128i eqs[max_values];
         for (size_t i = 0; i < value_size; ++i) {
             eqs[i] = _mm_cmpeq_epi8(c, vs[i]);
         }

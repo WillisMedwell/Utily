@@ -14,7 +14,11 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_UTILY_TESTS": "ON",
-                "BUILD_UTILY_BENCHMARKS": "ON"
+                "BUILD_UTILY_BENCHMARKS": "ON",
+                "HAVE_STEADY_CLOCK": "0",
+                "HAVE_POSIX_REGEX": "0",
+                "HAVE_STD_REGEX": "0",
+                "HAVE_THREAD_SAFETY_ATTRIBUTES": "0"
             },
             "environment": {
                 "CC": "gcc",
@@ -29,11 +33,34 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_UTILY_TESTS": "ON",
-                "BUILD_UTILY_BENCHMARKS": "ON"
+                "BUILD_UTILY_BENCHMARKS": "ON",
+                "HAVE_STEADY_CLOCK": "0",
+                "HAVE_POSIX_REGEX": "0",
+                "HAVE_STD_REGEX": "0",
+                "HAVE_THREAD_SAFETY_ATTRIBUTES": "0"
             },
             "environment": {
                 "CC": "clang",
                 "CXX": "clang++"
+            }
+        },
+        {
+            "name": "emscripten-ninja",
+            "description": "Build with Emscripten SDK",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/emscripten-ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_UTILY_TESTS": "ON",
+                "BUILD_UTILY_BENCHMARKS": "ON",
+                "HAVE_STEADY_CLOCK": "0",
+                "HAVE_POSIX_REGEX": "0",
+                "HAVE_STD_REGEX": "0",
+                "HAVE_THREAD_SAFETY_ATTRIBUTES": "0"
+            },
+            "environment": {
+                "CC": "emcc",
+                "CXX": "em++"
             }
         }
     ],
@@ -45,6 +72,10 @@
         {
             "name": "clang-ninja",
             "configurePreset": "clang-ninja"
+        },
+        {
+            "name": "emscripten-ninja",
+            "configurePreset": "emscripten-ninja"
         }
     ]
 }

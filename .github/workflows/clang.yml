@@ -1,0 +1,17 @@
+name: Clang
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: medwellwillis/clang-gcc-cmake-vcpkg-git:0.2
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build With Clang
+      run: |
+        cmake --preset clang-ninja
+        cmake --build ./build/clang-ninja --config Release
