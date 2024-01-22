@@ -61,7 +61,7 @@ namespace Utily::Simd::Details {
     /*
         find -> char
     */
-#if UTY_SUPPORTS_512
+#if UTY_SUPPORTS_512 || defined(UTY_USE_SIMD_512)
     UTY_ALWAYS_INLINE auto find_512(const char* src_begin, const size_t src_size, char value) -> std::ptrdiff_t {
         constexpr static size_t chars_per_vec = 64;
         const size_t max_i_clamped = src_size - (src_size % chars_per_vec);
@@ -82,7 +82,7 @@ namespace Utily::Simd::Details {
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
 #endif
-#if UTY_SUPPORTS_256
+#if UTY_SUPPORTS_256 || defined(UTY_USE_SIMD_256)
     UTY_ALWAYS_INLINE auto find_256(const char* src_begin, const size_t src_size, char value) -> std::ptrdiff_t {
         constexpr static size_t chars_per_vec = 32;
 
@@ -106,7 +106,7 @@ namespace Utily::Simd::Details {
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
 #endif
-#if UTY_SUPPORTS_128
+#if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
     UTY_ALWAYS_INLINE auto find_128(const char* src_begin, const size_t src_size, char value) -> std::ptrdiff_t {
 
         constexpr static size_t chars_per_vec = 128 / 8;
@@ -131,11 +131,11 @@ namespace Utily::Simd::Details {
     }
 #endif
     UTY_ALWAYS_INLINE auto find(const char* src_begin, const size_t src_size, char value) noexcept -> std::ptrdiff_t {
-#if defined(UTY_USE_SIMD_512)
+#if defined(UTY_USE_SIMD_512) || defined(UTY_USE_SIMD_512)
         return find_512(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_256)
+#elif defined(UTY_USE_SIMD_256) || defined(UTY_USE_SIMD_256)
         return find_256(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_128)
+#elif defined(UTY_USE_SIMD_128) || defined(UTY_USE_SIMD_128)
         return find_128(src_begin, src_size, value);
 #elif defined(UTY_NO_SIMD)
         return std::distance(src_begin, std::find(src_begin, src_begin + src_size, value));
@@ -147,7 +147,7 @@ namespace Utily::Simd::Details {
     /*
         find -> int32_t
     */
-#if UTY_SUPPORTS_512
+#if UTY_SUPPORTS_512 || defined(UTY_USE_SIMD_512)
     UTY_ALWAYS_INLINE auto find_512(const int32_t* src_begin, size_t src_size, int32_t value) -> std::ptrdiff_t {
         using Vec = __m512i;
         using Type = int32_t;
@@ -170,7 +170,7 @@ namespace Utily::Simd::Details {
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
 #endif
-#if UTY_SUPPORTS_128
+#if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
     UTY_ALWAYS_INLINE auto find_128(const int32_t* src_begin, const size_t src_size, int32_t value) -> std::ptrdiff_t {
         using Vec = __m128i;
         using Type = int32_t;
@@ -199,12 +199,12 @@ namespace Utily::Simd::Details {
     }
 #endif // SUPPORTS_XXX
     UTY_ALWAYS_INLINE auto find(const int32_t* src_begin, const size_t src_size, int32_t value) noexcept -> std::ptrdiff_t {
-#if defined(UTY_USE_SIMD_512)
+#if defined(UTY_USE_SIMD_512) || defined(UTY_USE_SIMD_512)
         return find_512(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_256)
+#elif defined(UTY_USE_SIMD_256) || defined(UTY_USE_SIMD_256)
         // TODO
         return find_128(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_128)
+#elif defined(UTY_USE_SIMD_128) || defined(UTY_USE_SIMD_128)
         return find_128(src_begin, src_size, value);
 #elif defined(UTY_NO_SIMD)
         return std::distance(src_begin, std::find(src_begin, src_begin + src_size, value));
@@ -216,7 +216,7 @@ namespace Utily::Simd::Details {
     /*
         find_first_of -> char
     */
-#if UTY_SUPPORTS_128
+#if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
     UTY_ALWAYS_INLINE auto find_first_of_128(const char* src_begin, const size_t src_size, const char* value_begin, size_t value_size) -> std::ptrdiff_t {
         constexpr static size_t chars_per_vec = 128 / 8;
 
@@ -265,7 +265,7 @@ namespace Utily::Simd::Details {
     UTY_ALWAYS_INLINE auto find_first_of(const char* src_begin, const size_t src_size, const char* value_begin, size_t value_size) noexcept -> std::ptrdiff_t {
 #if defined(UTY_NO_SIMD)
         return std::distance(src_begin, std::find_first_of(src_begin, src_begin + src_size, value_begin, value_begin + value_size));
-#elif UTY_SUPPORTS_128
+#elif UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
         return find_first_of_128(src_begin, src_size, value_begin, value_size);
 #else
         return std::distance(src_begin, std::find_first_of(src_begin, src_begin + src_size, value_begin, value_begin + value_size));

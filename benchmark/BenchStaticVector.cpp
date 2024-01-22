@@ -87,8 +87,8 @@ static void BM_Array_Assign(benchmark::State& state) {
         state.PauseTiming();
         std::array<T, N> a;
         state.ResumeTiming();
-        for (auto i = 0; i < N; ++i) {
-            a[i] = T{i};
+        for (size_t i = 0; i < N; ++i) {
+            a[i] = static_cast<T>(i);
         }
     }
 }
@@ -96,8 +96,8 @@ BENCHMARK(BM_Array_Assign);
 
 static void BM_Array_Iterate(benchmark::State& state) {
     std::array<T, N> a;
-    for (auto i = 0; i < N; ++i) {
-        a[i] = T{i};
+    for (size_t i = 0; i < N; ++i) {
+        a[i] = static_cast<T>(i);
     }
     for (auto _ : state) {
         for (auto& x : a) {

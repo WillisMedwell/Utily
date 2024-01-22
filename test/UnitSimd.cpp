@@ -19,5 +19,5 @@ TEST(Simd, Find) {
 
     EXPECT_EQ(
         std::ranges::find(NUMS, 16),
-        Utily::Simd::find(NUMS.begin(), NUMS.end(), (uint8_t)16));
+        Utily::Simd::find(NUMS.begin(), NUMS.end(), static_cast<uint16_t>(16)));
 }
