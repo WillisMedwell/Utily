@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.11)
 
 project(
     Utily
@@ -20,11 +20,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy DESTINATION ${CMAKE_CURRENT_BI
 if(DEFINED EMSCRIPTEN)
     message(STATUS "For Emscripten SIMD use flags: \"-msimd128 -mrelaxed-simd -msse -msse2 -mavx\"")
 elseif(NOT MSVC)
-    # Enable all the warnings.
     target_compile_options(Utily_Utily PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
-    # For std::format.
-    target_compile_options(Utily_Utily PRIVATE -fexperimental-library)
-    message(STATUS "For Native SIMD use flags: \"-mavx2 -mavx512bw\"")
+    message(STATUS "For Native SIMD use flags: \"-march=native\"")
 endif()
 
 set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)
@@ -32,9 +29,27 @@ set_property(TARGET Utily_Utily PROPERTY EXPORT_NAME Utily)
 target_compile_features(Utily_Utily PUBLIC cxx_std_20)
 target_include_directories(Utily_Utily PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+option(BUILD_UTILY_TESTS "Build Utily test suite" OFF)
+option(BUILD_UTILY_BENCHMARKS "Build Utily benchmarks" OFF)
+
+if(BUILD_UTILY_TESTS OR BUILD_UTILY_BENCHMARKS)
+    include(FetchContent)
+endif()
+
 # Test Setup
-find_package(GTest CONFIG) 
-if(GTest_FOUND)
+if(BUILD_UTILY_TESTS)
+    find_package(GTest CONFIG) 
+    if(NOT GTest_FOUND)
+        message(STATUS "Downloading GTest...")
+        FetchContent_Declare(
+            GTest
+            GIT_REPOSITORY https://github.com/google/googletest
+            GIT_TAG main
+            GIT_SHALLOW FALSE
+        )
+        FetchContent_MakeAvailable(GTest)
+    endif()
+
     add_executable(UtilyTest ${UTILY_TEST_SOURCES})
     if(DEFINED EMSCRIPTEN)
         target_compile_options(UtilyTest PRIVATE "-Wdeprecated-declarations")
@@ -42,20 +57,33 @@ if(GTest_FOUND)
         set(CMAKE_EXECUTABLE_SUFFIX ".html")
     elseif(NOT MSVC)
         target_compile_options(UtilyTest PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
-        target_compile_options(UtilyTest PRIVATE -mavx2 -mavx512bw)
+        target_compile_options(UtilyTest PRIVATE -march=native)
     endif()
+
     target_link_libraries(UtilyTest PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main Utily::Utily)
     enable_testing()
     add_test(NAME AllTestsInUtilyTest COMMAND UtilyTest)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-else()
-    message(STATUS "Package \"GTest\" not found, not building tests.")
 endif()
-    
+
 # Benchmark Setup    
-find_package(benchmark CONFIG)
-if(benchmark_FOUND)
+if(BUILD_UTILY_BENCHMARKS)
+    find_package(benchmark CONFIG)
+    if(NOT benchmark_FOUND)
+        message(STATUS "Downloading Benchmark...")
+
+        FetchContent_Declare(
+            benchmark
+            GIT_REPOSITORY https://github.com/google/benchmark
+            GIT_TAG main
+            GIT_SHALLOW FALSE
+        )
+        
+        set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable Google Benchmark tests" FORCE)
+        FetchContent_MakeAvailable(benchmark)
+    endif()
     add_executable(UtilyBenchmark ${UTILY_BENCHMARK_SOURCES})
+    
 
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     if(DEFINED EMSCRIPTEN)
@@ -72,10 +100,8 @@ if(benchmark_FOUND)
         target_compile_options(UtilyBenchmark PRIVATE -msimd128 -mrelaxed-simd -msse -msse2 -mavx)
     elseif(NOT MSVC)
         target_compile_options(UtilyBenchmark PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
-        target_compile_options(UtilyBenchmark PRIVATE -mavx2 -mavx512bw)
+        target_compile_options(UtilyBenchmark PRIVATE -march=native)
     endif()
     target_link_libraries(UtilyBenchmark PRIVATE benchmark::benchmark benchmark::benchmark_main Utily::Utily)
-else()
-    message(STATUS "Package \"benchmark\" not found, not building benchmarks.")
 endif()
 

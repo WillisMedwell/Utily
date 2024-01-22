@@ -5,7 +5,6 @@
 #include <list>
 #include <memory>
 #include <string_view>
-#include <print>
 
 using namespace std::literals;
 
@@ -23,7 +22,7 @@ TEST(Split, SplitsByElement) {
     { // non-contigious split
         std::list<int> list;
         Utily::Split::ByElement splitter { list, 0 };
-        using SplitType = decltype(*splitter.begin());
+        using SplitType = std::iter_value_t<decltype(splitter.begin())>;
         static_assert(
             !std::same_as<SplitType, std::string_view>
             && !std::same_as<SplitType, std::span<int>>);

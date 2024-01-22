@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <ranges>
 
 namespace Utily {
     namespace Concepts {
@@ -22,7 +23,6 @@ namespace Utily {
         };
         static_assert(HasMoveOperator<std::string>);
 
-
         template <typename T>
         concept HasCopyConstructor = requires(const T& t) {
             {
@@ -41,17 +41,11 @@ namespace Utily {
         static_assert(HasCopyOperator<std::string>);
 
         template <typename T>
-        concept IsContiguousRange = requires(T t) {
-            {
-                t.begin()
+        concept IsContiguousRange =
+            std::ranges::contiguous_range<T> && std::ranges::sized_range<T> && requires(T a) {
+                { std::ranges::data(a) } -> std::contiguous_iterator;
             };
-            {
-                t.end()
-            };
-            {
-                t.data()
-            };
-        };
+
         static_assert(IsContiguousRange<std::string>);
         static_assert(!IsContiguousRange<std::list<int>>);
 
@@ -69,6 +63,11 @@ namespace Utily {
             {
                 t(param...)
             };
+        };
+
+        template <typename Iter>
+        concept SubrangeCompatible = std::contiguous_iterator<Iter> && requires(Iter a, Iter b) {
+            { std::ranges::subrange(a, b) } -> std::convertible_to<std::ranges::subrange<Iter>>;
         };
     }
 

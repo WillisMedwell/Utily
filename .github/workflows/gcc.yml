@@ -1,0 +1,22 @@
+name: GCC
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: musicscience37/gcc-ci:latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build With GCC
+      run: |
+        cmake --preset gcc-ninja
+        cmake --build ./build/gcc-ninja --config Release
+
+    - name: Run Tests
+      run: |
+        ./build/gcc-ninja/UtilyTest
+        ./build/gcc-ninja/UtilyBenchmark

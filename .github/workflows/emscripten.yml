@@ -1,0 +1,22 @@
+name: Emscripten
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: 
+      image: emscripten/emsdk
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get Ninja
+      run: |
+        python3 -m pip install ninja
+
+    - name: Build With Emscripten
+      run: |
+        mkdir -p build/emscripten-ninja
+        emcmake cmake --preset emscripten-ninja -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=ON
+        cmake --build build/emscripten-ninja --config Release

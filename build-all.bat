@@ -1,3 +1,5 @@
+@REM This is for local building on windows. You will need emscripten SDK, cmake, and ninja.
+
 @echo off
 set VCPKG_PATH=C:/apps/vcpkg/vcpkg/
 
@@ -10,16 +12,14 @@ call cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release
 call cmake --build . --config Release
 cd ..
 
-
 @REM WEB
 if not exist "build-web\" (
     mkdir build-web
 )
 cd build-web
-call emcmake cmake .. -DCMAKE_TOOLCHAIN_FILE=%VCPKG_PATH%/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=wasm32-emscripten -DEMSCRIPTEN=1 -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=%EMSCRIPTEN%cmake/Modules/Platform/Emscripten.cmake -DCMAKE_BUILD_TYPE=Release
+call emcmake cmake .. -DEMSCRIPTEN=1 -DCMAKE_BUILD_TYPE=Release
 call cmake --build . --config Release
 cd ..
-
 
 cd build-native
 call UtilyTest.exe

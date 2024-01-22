@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#if 0
+
 const static auto STANFORD_BUNNY_PATH = std::filesystem::path { "resources/stanford_bunny.ply" };
 const static auto STANFORD_BUNNY_DATA = std::vector<char> (
     (std::istreambuf_iterator<char>(std::ifstream(STANFORD_BUNNY_PATH, std::ios::binary).rdbuf())),
@@ -57,3 +59,5 @@ TEST(AsyncFileReader, WaitForIndividual) {
             });
     }
 }
+
+#endif

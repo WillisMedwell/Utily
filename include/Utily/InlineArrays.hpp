@@ -18,7 +18,7 @@ namespace Utily {
         template <typename T>
         static auto is_aligned(auto* ptr) {
             return reinterpret_cast<std::uintptr_t>(ptr) % alignof(T) == 0;
-        };
+        }
 
         template <typename... Types, std::integral... Size>
             requires(sizeof...(Size) == sizeof...(Types))

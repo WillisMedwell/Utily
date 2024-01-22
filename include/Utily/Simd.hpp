@@ -21,6 +21,7 @@
 
 #include <array>
 #include <cassert>
+#include <cstring>
 #include <iostream>
 
 // Check for SSE support
@@ -77,7 +78,7 @@ namespace Utily::Simd::Details {
         }
 
         __m512i c = v;
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
         uint64_t eq_bits = std::bit_cast<uint64_t>(_mm512_cmpeq_epi8_mask(c, v));
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
@@ -100,7 +101,7 @@ namespace Utily::Simd::Details {
         }
 
         __m256i c = v;
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
         const __m256i eq = _mm256_cmpeq_epi8(c, v);
         uint32_t eq_bits = std::bit_cast<uint32_t>(_mm256_movemask_epi8(eq));
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
@@ -125,7 +126,7 @@ namespace Utily::Simd::Details {
         }
 
         __m128i c = v;
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
         uint32_t eq_bits = std::bit_cast<uint32_t>(_mm_movemask_epi8(_mm_cmpeq_epi8(c, v)));
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
@@ -165,7 +166,7 @@ namespace Utily::Simd::Details {
             }
         }
         Vec c = v;
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
         uint16_t eq_bits = std::bit_cast<uint16_t>(_mm512_cmpeq_epi32_mask(c, v));
         return static_cast<std::ptrdiff_t>(max_i_clamped) + std::countr_zero(eq_bits);
     }
@@ -191,7 +192,7 @@ namespace Utily::Simd::Details {
         }
 
         Vec c = v;
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
         auto eqi = _mm_cmpeq_epi32(c, v);
         auto eq = _mm_castsi128_ps(eqi);
         uint32_t eq_bits = std::bit_cast<uint32_t>(_mm_movemask_ps(eq));
@@ -225,14 +226,14 @@ namespace Utily::Simd::Details {
 
         const size_t max_i_clamped = src_size - (src_size % chars_per_vec);
 
-        std::array<__m128i, max_values> vs;
+        __m128i vs[max_values];
         for (size_t i = 0; i < value_size; ++i) {
             vs[i] = _mm_set1_epi8(value_begin[i]);
         }
 
         for (size_t i = 0; i < max_i_clamped; i += chars_per_vec) {
             const __m128i c = _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i));
-            std::array<__m128i, max_values> eqs;
+            __m128i eqs[max_values];
             for (size_t ii = 0; ii < value_size; ++ii) {
                 eqs[ii] = _mm_cmpeq_epi8(c, vs[ii]);
             }
@@ -248,9 +249,9 @@ namespace Utily::Simd::Details {
 
         __m128i c = vs[0];
 
-        std::memcpy(&c, (src_begin + max_i_clamped), src_size - max_i_clamped);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + max_i_clamped), src_size - max_i_clamped);
 
-        std::array<__m128i, max_values> eqs;
+        __m128i eqs[max_values];
         for (size_t i = 0; i < value_size; ++i) {
             eqs[i] = _mm_cmpeq_epi8(c, vs[i]);
         }

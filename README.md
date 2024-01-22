@@ -1,4 +1,9 @@
 # Utily
+
+![Emscripten SDK Build](https://github.com/WillisMedwell/Utily/actions/workflows/emscripten.yml/badge.svg)
+![Clang Build](https://github.com/WillisMedwell/Utily/actions/workflows/clang.yml/badge.svg)
+![GCC Build](https://github.com/WillisMedwell/Utily/actions/workflows/gcc.yml/badge.svg)
+
 **Utily** is a library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust and compile-time compatiable** code in C++.
 
 In addition the library is **optimised for Windows, Emscripten**, and Linux too.
@@ -290,6 +295,8 @@ constexpr auto to_array(Args&&... args)
 Using Modern cmake features means that we can use CMake as a dependency manager relatively easily.
  
 ```CMake
+include(FetchContent)
+
 FetchContent_Declare(
     Utily
     GIT_REPOSITORY https://github.com/WillisMedwell/Utily.git
@@ -307,6 +314,18 @@ In the future, I would like to have Utily:: supported by package managers like v
 ---
 
 </details>
+
+<details><summary><b>Building Tests and Benchmarks</b></summary>
+
+I don't want my users to be wasting time by building the tests and benchmarks.
+
+As such, to build these tests and benchmarks you will need to have both [benchmark](https://github.com/google/benchmark) & [gtest](https://github.com/google/googletest) as 'findable' packages using cmake's `find_package`
+
+
+---
+
+</details>
+
 
 <details><summary><b>Conditions</b></summary>
 
