@@ -45,36 +45,6 @@ namespace Utily {
                 ContainerIter end;
                 Delim delim;
 
-                auto fast_find(auto iter, auto end, char c) {
-                    std::string_view s { iter, end };
-
-                    __m128i result = _mm_set1_epi8(c);
-                    __m128i characters;
-                    __m128i eq;
-
-                    for (auto i = 0; i < s.size() - (s.size() % 16); i += 16) {
-                        characters = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&s[i]));
-                        eq = _mm_cmpeq_epi8(characters, result);
-                        uint32_t mask = _mm_movemask_epi8(eq);
-                        if (mask != 0) {
-                            auto index = std::countr_zero(mask);
-                            return s.begin() + (i + index);
-                        }
-                    }
-
-                    characters = _mm_set1_epi8(c);
-                    std::memcpy(
-                        &characters,
-                        &*(s.begin() + (s.size() - (s.size() % 16))),
-                        s.size() % 16);
-
-                    eq = _mm_cmpeq_epi8(characters, result);
-                    uint32_t mask = _mm_movemask_epi8(eq);
-
-                    auto index = std::countr_zero(mask);
-                    return s.begin()+ (s.size() - (s.size() % 16) + index);
-                }
-
                 constexpr auto operator++() noexcept -> Iterator& {
                     if (current_end != end) {
                         current_begin = std::find_if_not(current_end, end, [&](auto element) { return element == delim; });

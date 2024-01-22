@@ -228,6 +228,12 @@ namespace Utily {
         return;
     }
 
+    auto AsyncFileReader::wait_pop(std::filesystem::path file_path) -> Utily::Result<std::vector<char>, Utily::Error> {
+        return Utily::Error("Not implemented");
+    }
+
+    
+
 #elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 
 #endif
