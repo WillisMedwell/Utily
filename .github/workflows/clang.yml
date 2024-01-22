@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: medwellwillis/clang-gcc-cmake-vcpkg-git:0.2
+      image: musicscience37/clang-ci:latest
 
     steps:
     - uses: actions/checkout@v2
@@ -15,3 +15,8 @@ jobs:
       run: |
         cmake --preset clang-ninja
         cmake --build ./build/clang-ninja --config Release
+
+    - name: Run Tests
+      run: |
+        ./build/clang-ninja/UtilyTest
+        ./build/clang-ninja/UtilyBenchmark

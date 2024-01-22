@@ -83,6 +83,7 @@ if(BUILD_UTILY_BENCHMARKS)
         FetchContent_MakeAvailable(benchmark)
     endif()
     add_executable(UtilyBenchmark ${UTILY_BENCHMARK_SOURCES})
+    
 
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     if(DEFINED EMSCRIPTEN)

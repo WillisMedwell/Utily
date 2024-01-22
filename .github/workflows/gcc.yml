@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: medwellwillis/clang-gcc-cmake-vcpkg-git:0.2
+      image: musicscience37/gcc-ci:latest
 
     steps:
     - uses: actions/checkout@v2
