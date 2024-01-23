@@ -72,23 +72,28 @@ namespace Utily {
         }
 
     private:
-        template <typename TupleRangeIn, typename TupleDest, size_t Max, size_t Index = 0>
-        constexpr static void uninit_copy(TupleRangeIn& in, TupleDest& dest) {
+        template <size_t Max, typename TupleRangeDest, size_t Index = 0, typename Range, typename... Ranges>
+        constexpr static void uninit_copy(TupleRangeDest& dest, Range&& range, Ranges&&... ranges) {
             if constexpr (Index == Max) {
                 return;
             } else {
-                std::ranges::uninitialized_copy(std::get<Index>(in), std::get<Index + 1>(dest));
-                return uninit_copy<TupleRangeIn, TupleDest, Max, Index + 1>(in, dest);
+                std::ranges::uninitialized_copy(range, std::get<Index + 1>(dest));
+                return uninit_copy<Max, TupleRangeDest, Index + 1>(dest, std::forward<Ranges>(ranges)...);
             }
         }
 
-        template<std::ranges::range Range>
+        template <size_t Max, typename TupleRangeDest, size_t Index = 0>
+        constexpr static void uninit_copy(TupleRangeDest& in [[maybe_unused]]) {
+            return;
+        }
+
+        template <typename Range>
         static auto get_range_size(Range&& range) {
             if constexpr (std::ranges::sized_range<Range>) {
                 return range.size();
             } else {
                 size_t i = 0;
-                for (auto iter = range.begin(); iter != range.end(); ++iter, ++i) { }
+                for (auto iter = range.cbegin(); iter != range.cend(); ++iter, ++i) { }
                 return i;
             }
         }
@@ -96,17 +101,15 @@ namespace Utily {
     public:
         template <typename... Types, std::ranges::range... Range>
             requires(sizeof...(Types) == sizeof...(Range))
-            && ((!std::is_reference_v<Range>) && ...)
-        auto static alloc_copy(const Range&... range) {
-            auto owner_and_spans = alloc_uninit<Types...>(get_range_size(range)...);
-            const auto ranges = std::make_tuple(range...);
+        auto static alloc_copy(Range&&... range) {
+            auto owner_and_spans = alloc_uninit<Types...>(get_range_size(std::forward<Range>(range))...);
+            uninit_copy<sizeof...(Range), decltype(owner_and_spans)>(owner_and_spans, std::forward<Range>(range)...);
 
-            uninit_copy<decltype(ranges), decltype(owner_and_spans), sizeof...(Range), 0>(ranges, owner_and_spans);
             return owner_and_spans;
         }
         template <std::ranges::range... Range>
-        auto static alloc_copy(const Range&... range) {
-            return alloc_copy<std::ranges::range_value_t<Range>...>(range...);
+        auto static alloc_copy(Range&&... range) {
+            return alloc_copy<std::ranges::range_value_t<Range>...>(std::forward<Range>(range)...);
         }
     };
 }
