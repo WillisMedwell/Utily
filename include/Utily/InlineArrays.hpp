@@ -60,7 +60,6 @@ namespace Utily {
         static auto alloc_dafault(Size... array_size) {
             auto owner_and_spans = alloc_uninit<Types...>(array_size...);
 
-
             Utily::TupleAlgo::for_each(owner_and_spans,
                 [](auto& span) {
                     using Type = std::decay_t<decltype(span)>;
@@ -83,12 +82,23 @@ namespace Utily {
             }
         }
 
+        template<std::ranges::range Range>
+        static auto get_range_size(Range&& range) {
+            if constexpr (std::ranges::sized_range<Range>) {
+                return range.size();
+            } else {
+                size_t i = 0;
+                for (auto iter = range.begin(); iter != range.end(); ++iter, ++i) { }
+                return i;
+            }
+        }
+
     public:
         template <typename... Types, std::ranges::range... Range>
             requires(sizeof...(Types) == sizeof...(Range))
             && ((!std::is_reference_v<Range>) && ...)
         auto static alloc_copy(const Range&... range) {
-            auto owner_and_spans = alloc_uninit<Types...>(range.size()...);
+            auto owner_and_spans = alloc_uninit<Types...>(get_range_size(range)...);
             const auto ranges = std::make_tuple(range...);
 
             uninit_copy<decltype(ranges), decltype(owner_and_spans), sizeof...(Range), 0>(ranges, owner_and_spans);
