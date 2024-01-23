@@ -151,7 +151,6 @@ namespace Utily::Simd::Details {
 #if UTY_SUPPORTS_512 || defined(UTY_USE_SIMD_512)
     UTY_ALWAYS_INLINE auto find_512(const int32_t* src_begin, size_t src_size, int32_t value) -> std::ptrdiff_t {
         using Vec = __m512i;
-        using Type = int32_t;
 
         constexpr static size_t ints_per_vec = 512 / 32;
         const size_t max_i_clamped = src_size - (src_size % ints_per_vec);
@@ -174,7 +173,6 @@ namespace Utily::Simd::Details {
 #if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
     UTY_ALWAYS_INLINE auto find_128(const int32_t* src_begin, const size_t src_size, int32_t value) -> std::ptrdiff_t {
         using Vec = __m128i;
-        using Type = int32_t;
 
         constexpr static size_t ints_per_vec = 128 / 32;
         const size_t max_i_clamped = src_size - (src_size % ints_per_vec);

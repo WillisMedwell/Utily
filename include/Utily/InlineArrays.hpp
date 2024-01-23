@@ -23,8 +23,6 @@ namespace Utily {
         template <typename... Types, std::integral... Size>
             requires(sizeof...(Size) == sizeof...(Types))
         static auto alloc_uninit(Size... array_size) {
-            using Spans = std::tuple<std::span<Types>...>;
-            using OwnerAndSpans = std::tuple<Owner, std::span<Types>...>;
             constexpr static size_t padding_for_alignment = (alignof(Types) + ...);
 
             const auto size = padding_for_alignment + ((sizeof(Types) * static_cast<size_t>(array_size)) + ...);
@@ -45,6 +43,7 @@ namespace Utily {
                 data_ptr = reinterpret_cast<std::byte*>(end);
                 ++size_iter;
             };
+            using Spans = std::tuple<std::span<Types>...>;
             Spans spans;
             Utily::TupleAlgo::for_each(spans, set_up_span);
 
@@ -60,8 +59,7 @@ namespace Utily {
             && (sizeof...(Size) == sizeof...(Types))
         static auto alloc_dafault(Size... array_size) {
             auto owner_and_spans = alloc_uninit<Types...>(array_size...);
-            using Spans = std::tuple<std::span<Types>...>;
-            using OwnerAndSpans = std::tuple<Owner, std::span<Types>...>;
+
 
             Utily::TupleAlgo::for_each(owner_and_spans,
                 [](auto& span) {
