@@ -34,9 +34,9 @@ namespace Utily {
             } else if constexpr (std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>) {
                 static_assert(std::is_constructible_v<Value, Arg&&> && std::is_constructible_v<Error, Arg&&>, "Obscure move constructor.");
             } else if constexpr (std::is_constructible_v<Value, Arg&&>) {
-                std::construct_at(&_result, Value{arg});
+                std::construct_at(&_result, static_cast<Value>(arg));
             } else if constexpr (std::is_constructible_v<Error, Arg&&>) {
-                std::construct_at(&_result, Error{arg});
+                std::construct_at(&_result, static_cast<Error>(arg));
             } 
         }
 
