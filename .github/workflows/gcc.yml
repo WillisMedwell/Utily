@@ -6,8 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: musicscience37/gcc-ci:latest
-
+      image: musicscience37/gcc-ci:gcc13
     steps:
     - uses: actions/checkout@v2
 

@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: 
-      image: musicscience37/clang-ci:latest
+      image: musicscience37/clang-ci:clang18
 
     steps:
     - uses: actions/checkout@v2
