@@ -108,8 +108,8 @@ namespace Utily {
         }
 
         fseek(handle, 0, SEEK_END);
-        size_t file_size = ftell(handle);
-        rewind(handle);
+        size_t file_size = static_cast<size_t>(ftell(handle));
+        fseek(handle, 0, SEEK_SET);
 
         std::vector<uint8_t> buffer(file_size);
         size_t bytes_read = fread(buffer.data(), sizeof(uint8_t), file_size, handle);

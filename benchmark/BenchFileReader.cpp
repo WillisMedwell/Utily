@@ -18,7 +18,7 @@ static std::vector<uint8_t> readFileToVector(const std::filesystem::path& path) 
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg); 
 
-    std::vector<uint8_t> buffer(size);
+    std::vector<uint8_t> buffer(static_cast<uint64_t>(size));
     if (!file.read(reinterpret_cast<char*>(buffer.data()), size)) {
         throw std::runtime_error("Error occurred while reading the file: " + path.string());
     }
