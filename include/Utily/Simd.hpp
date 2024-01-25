@@ -26,6 +26,7 @@
 #define UTY_SUPPORTS_128 1
 #include <emmintrin.h>
 #include <xmmintrin.h>
+#include <pmmintrin.h>
 #else
 #define UTY_SUPPORTS_128 0
 #endif

@@ -4,9 +4,11 @@
 ![Clang Build](https://github.com/WillisMedwell/Utily/actions/workflows/clang.yml/badge.svg)
 ![GCC Build](https://github.com/WillisMedwell/Utily/actions/workflows/gcc.yml/badge.svg)
 
-**Utily** is a library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust and compile-time compatiable** code in C++.
+**Utily** is a library using modern C++ features. From basic helper types to reflection, this library supplies all the ideal functions to **build robust** software in C++.
 
 In addition the library is **optimised for Windows, Emscripten**, and Linux too.
+
+
 
 ## Library Contents
 
