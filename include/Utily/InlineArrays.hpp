@@ -91,11 +91,20 @@ namespace Utily {
         static auto get_range_size(Range&& range) {
             if constexpr (std::ranges::sized_range<Range>) {
                 return range.size();
-            } else {
+            } else if constexpr (requires { range.cbegin(); range.cend(); }) {
                 size_t i = 0;
                 for (auto iter = range.cbegin(); iter != range.cend(); ++iter, ++i) { }
                 return i;
+            } else if constexpr (requires { range.begin(); range.end(); }) {
+                size_t i = 0;
+                for (auto iter = range.begin(); iter != range.end(); ++iter, ++i) { }
+                return i;
             }
+            static_assert(
+                std::ranges::sized_range<Range>
+                    || (requires { range.cbegin(); range.cend(); })
+                    || (requires { range.begin(); range.end(); }),
+                "Cannot determine the ranges' size.");
         }
 
     public:

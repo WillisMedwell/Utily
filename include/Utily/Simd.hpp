@@ -22,8 +22,9 @@
 #include <iostream>
 
 // Check for SSE support
-#if defined(__SSE__) || defined(_M_IX86_FP) && _M_IX86_FP >= 1
+#if defined(__SSE__) && defined(__SSE2__)
 #define UTY_SUPPORTS_128 1
+#include <emmintrin.h>
 #include <xmmintrin.h>
 #else
 #define UTY_SUPPORTS_128 0

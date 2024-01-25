@@ -13,12 +13,12 @@ call cmake --build . --config Release
 cd ..
 
 @REM WEB
-if not exist "build/emscripten-ninja" (
-    mkdir build/emscripten-ninja
-)
-call emcmake cmake --preset emscripten-ninja -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=ON
-call cmake --build build/emscripten-ninja --config Release
-cd ..
+@REM if not exist "build/emscripten-ninja" (
+@REM     mkdir build/emscripten-ninja
+@REM )
+@REM call emcmake cmake --preset emscripten-ninja -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=ON
+@REM call cmake --build build/emscripten-ninja --config Release
+@REM cd ..
 cd build-native
 call UtilyTest.exe
 call UtilyBenchmark.exe
