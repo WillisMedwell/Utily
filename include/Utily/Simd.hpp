@@ -6,10 +6,7 @@
 #include <algorithm>
 #include <bit>
 #include <bitset>
-#include <emmintrin.h>
-#include <immintrin.h>
 #include <type_traits>
-#include <xmmintrin.h>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define UTY_ALWAYS_INLINE __attribute__((always_inline)) inline

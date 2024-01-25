@@ -19,7 +19,6 @@ if not exist "build/emscripten-ninja" (
 call emcmake cmake --preset emscripten-ninja -DCMAKE_SUPPRESS_DEVELOPER_WARNINGS=ON
 call cmake --build build/emscripten-ninja --config Release
 cd ..
-
 cd build-native
 call UtilyTest.exe
 call UtilyBenchmark.exe
