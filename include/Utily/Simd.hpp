@@ -22,7 +22,7 @@
 #include <iostream>
 
 // Check for SSE support
-#if defined(__SSE__) && defined(__SSE2__)
+#if defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__)
 #define UTY_SUPPORTS_128 1
 #include <emmintrin.h>
 #include <xmmintrin.h>
