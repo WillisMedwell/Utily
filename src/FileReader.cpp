@@ -77,7 +77,54 @@ namespace Utily {
     }
 }
 
+/* 
+Using mmap or sys read is not as fast as just using clib functions. 
+
+#elif defined(__unix__)
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+
+namespace Utily {
+    auto FileReader::load_entire_file(std::filesystem::path file_path)
+        -> Utily::Result<std::vector<uint8_t>, Utily::Error> {
+
+        auto fp = file_path.c_str();
+
+        constexpr bool NeedsPathConversion = std::same_as<std::filesystem::path::value_type, char>;
+
+        int handle = -1;
+
+        if constexpr (NeedsPathConversion) {
+            std::string utf8 = file_path.string();
+            handle = open(utf8.c_str(), O_RDONLY);
+        } else {
+            handle = open(fp, O_RDONLY);
+        }
+
+        if (handle == -1) {
+            return Utily::Error { std::format("The file {} could not be opened.", fp) };
+        }
+
+        size_t file_size = static_cast<size_t>(lseek(handle, 0, SEEK_END));
+        lseek(handle, 0, SEEK_SET);
+
+        std::vector<uint8_t> buffer(file_size);
+
+        uint8_t* mapped_memory= reinterpret_cast<uint8_t*>(mmap(NULL, file_size, PROT_READ, MAP_SHARED, handle, 0));
+        madvise(mapped_memory, file_size, MADV_WILLNEED);
+
+        std::copy(mapped_memory, mapped_memory + file_size, buffer.data());
+
+        munmap(mapped_memory, file_size);
+        close(handle);
+        return buffer;
+    }
+}
+
 #else
+*/
 #warning "Platform is not optimised for file reading."
 
 #include <cstdio>
