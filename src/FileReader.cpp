@@ -122,9 +122,9 @@ namespace Utily {
         return buffer;
     }
 }
+*/
 
 #else
-*/
 #warning "Platform is not optimised for file reading."
 
 #include <cstdio>
