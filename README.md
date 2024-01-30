@@ -15,41 +15,29 @@ In addition the library is **optimised for Windows, Emscripten**, and Linux too.
 ```c++
 namespace Utily {
     class Error;    
-    class Result;   
-    class StaticVector<T, S>;
-
-    
-    static non-constexpr class InlineArrays {
+    class Result;
+    class StaticVector<T, S>;                                    // perf as *good as std::array on Clang & GCC. 
+    class InlineArrays {                                        
         static alloc_uninit<T1, T2,...>(s1, s2,...);
         static alloc_default<T1, T2, ...>(s1, s2, ...);
         static alloc_copy<T1, T2>(R1 range1, R2 range2);
     };
-
     namespace Simd {
-        iter find(iter, iter, value) // currently only support bytes (aka char & unsigned char)  
+        iter find(begin, end, value);                            // ~ x5 faster than std::find for char searching.
+        iter find_first_of(begin, end, value_begin, value_end);  // ~ x10 faster than std::find_first_of for char searching.
     }
-
-    // class AsyncFileReader;   
-
+    class FileReader {
+        static load_entire_file(path)                            // ~ x10 faster than using the STL on windows
+    }
     namespace Split {
         class ByElement;
-        class ByElements;
-        // class ByRange;      
-        // class ByRanges;     
+        class ByElements;                                      
     }
     auto split(range, auto...); 
-
     namespace TupleAlgo {
         void for_each(tuple, pred);
         void copy(tuple, iter);
-        // void transform(tuple, iter, pred);  
-        // auto reduce(tuple, init, pred);     
     }   
-
-    // namespace Reflection {
-    //     auto get_name<T>(); 
-    // }
-
     namespace Concepts {
         concept HasMoveConstructor<T>;
         concept HasMoveOperator<T>;
@@ -139,9 +127,9 @@ auto a = std::to_array<int>({1, 2, 3, 4});
 auto b = std::vector<bool>{true, false, true, false};
 auto c = Utily::StaticVector<char, 10>{'a', 'b', 'c'};
 
-auto [data1, ints1, bools1] = Utily::InlineArrays::alloc_copy<int, bool, char>(a, b, c);
+auto [data1, ints1, bools1, chars1] = Utily::InlineArrays::alloc_copy<int, bool, char>(a, b, c);
 // can also deduce types from the ranges.
-auto [data2, ints2, bools2] = Utily::InlineArrays::alloc_copy(a, b, c);    
+auto [data2, ints2, bools2, chars2] = Utily::InlineArrays::alloc_copy(a, b, c);    
 ```
 
 ---
