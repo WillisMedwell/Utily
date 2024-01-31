@@ -25,8 +25,8 @@
 #if defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__)
 #define UTY_SUPPORTS_128 1
 #include <emmintrin.h>
-#include <xmmintrin.h>
 #include <pmmintrin.h>
+#include <xmmintrin.h>
 #else
 #define UTY_SUPPORTS_128 0
 #endif
@@ -275,10 +275,16 @@ namespace Utily::Simd {
     template <std::contiguous_iterator Iter, typename Value>
     UTY_ALWAYS_INLINE auto find(Iter begin, Iter end, Value value) noexcept -> Iter {
         if constexpr (sizeof(std::iter_value_t<Iter>) == 1 && sizeof(Value) == 1) {
+            if (begin == end) {
+                return begin;
+            }
             auto data = reinterpret_cast<const char*>(&(*begin));
             auto& val = *reinterpret_cast<const char*>(&value);
             return begin + Utily::Simd::Details::find(data, static_cast<size_t>(std::distance(begin, end)), val);
         } else if constexpr (sizeof(std::iter_value_t<Iter>) == 4 && sizeof(Value) == 4) {
+            if (begin == end) {
+                return begin;
+            }
             auto data = reinterpret_cast<const int32_t*>(&(*begin));
             auto& val = *reinterpret_cast<const int32_t*>(&value);
             return begin + Utily::Simd::Details::find(data, static_cast<size_t>(std::distance(begin, end)), val);
