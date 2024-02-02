@@ -115,7 +115,7 @@ namespace Utily {
 #ifdef _MSC_VER
                 _aligned_free(_data);
 #else
-                free(data);
+                free(_data);
 #endif
                 _data = nullptr;
             }

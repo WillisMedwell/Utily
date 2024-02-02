@@ -128,20 +128,22 @@ Utily::StaticVector<int, 10> s_vector{1, 2, 3, 4};
 A vector with no compile time enfored type. Access is checked in debug mode at runtime using Reflection.
 Useful for on the fly composing of types.
 ```c++
-    auto vector = Utily::TypeErasedVector {};
-    vector.set_underlying_type<float>();
+// cannot resize or push back if the underlying_type is not set.
+auto vector = Utily::TypeErasedVector {};
+vector.set_underlying_type<float>();
 
-    // these operations will throw in debug mode.
-    vector.emplace_back<int>(1);       
-    vector.emplace_back<double>(1);
+// these operations will assert false in debug mode.
+vector.emplace_back<int>(1);       
+vector.emplace_back<double>(1);
 
-    vector.push_back<float>(0.0f);
-    vector.emplace_back<float>(1.0f);
+// these will be valid.
+vector.push_back<float>(0.0f);
+vector.emplace_back<float>(1.0f);
 
-    // as_span<T> can throw if T != Underlying
-    for (float& v : vector.as_span<float>()) {
-        std::cout << v << ' ';
-    }
+// as_span<T> will assert if T != Underlying.
+for (float& v : vector.as_span<float>()) {
+    std::cout << v << ' ';
+}
 ```
 
 ---
@@ -204,29 +206,18 @@ Simd optimised operations for supported algorithms. Mostly char searching at the
 const auto DELIMS = std::string_view { "azxy" };
 const auto STRING = std::string { "hello world! This is a sentenze" };
 
-auto iter1 = Utily::Simd::find(STRING.begin(), STRING.end(), DELIMS.front());
-
-auto iter2 = Utily::Simd::find_first_of(
+```
+```C++
+auto iter = Utily::Simd::find(STRING.begin(), STRING.end(), DELIMS.front());
+```
+```C++
+auto iter = Utily::Simd::find_first_of(
     STRING.begin(), STRING.end(), 
     DELIMS.begin(), DELIMS.end()
 );
-
 ```
 
 ---
-
-</details>
-
-
-
-<details><summary><b>Utily::Concepts</b></summary>
-
-Just a collection of [concepts](https://en.cppreference.com/w/cpp/concepts) to restrict/narrow types for templated functions ontop of the STL.
-
----
-
-</details>
-
 
 <details><summary><b>Utily::Split</b></summary>
 

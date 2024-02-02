@@ -7,8 +7,9 @@
 TEST(TypeErasedVector, Constructor) {
     {
         auto vector = Utily::TypeErasedVector {};
+#ifndef NDEBUG
         EXPECT_DEBUG_DEATH(vector.emplace_back<int>(1), "");
-
+#endif
         vector.set_underlying_type<float>();
         EXPECT_EQ(vector.size(), 0);
         EXPECT_EQ(vector.size_bytes(), 0);
@@ -38,8 +39,10 @@ TEST(TypeErasedVector, push_back) {
     EXPECT_EQ(vector.size_bytes(), 0);
     EXPECT_EQ(vector.capacity(), 0);
 
+#ifndef NDEBUG
     EXPECT_DEBUG_DEATH(vector.emplace_back<int>(1), "");
     EXPECT_DEBUG_DEATH(vector.emplace_back<double>(1), "");
+#endif
 
     vector.push_back<float>(0.0f);
     vector.push_back<float>(1.0f);
