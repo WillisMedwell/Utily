@@ -219,6 +219,8 @@ auto iter = Utily::Simd::find_first_of(
 
 ---
 
+</details>
+
 <details><summary><b>Utily::Split</b></summary>
 
 Subdividing ranges ('splitting') is so common and there's many slightly different ways we need to do it. Below are the iterator classes for each type of split.
