@@ -17,12 +17,16 @@ namespace Utily {
     class Error;    
     class Result;
     class StaticVector<T, S>;                                    // perf as *good as std::array on Clang & GCC. 
+    class TypeErasedVector;
     class InlineArrays {                                        
         static alloc_uninit<T1, T2,...>(s1, s2,...);
         static alloc_default<T1, T2, ...>(s1, s2, ...);
         static alloc_copy<T1, T2>(R1 range1, R2 range2);
     };
-    namespace Simd {
+    struct Reflection {
+        get_type_name<T>();
+    };
+    namespace Simd {                                             // Simd optimised algo's. Use flag "-mtune=native"
         iter find(begin, end, value);                            // ~ x5 faster than std::find for char searching.
         iter find_first_of(begin, end, value_begin, value_end);  // ~ x10 faster than std::find_first_of for char searching.
     }
@@ -108,6 +112,42 @@ auto result = do_thing()
 
 </details>
 
+<details><summary><b>Utily::StaticVector</b></summary>
+
+A stack based `std::vector` with a fixed capacity. Useful when you want to avoid heap allocations. 
+```c++
+Utily::StaticVector<int, 10> s_vector{1, 2, 3, 4};
+```
+
+---
+
+</details>
+
+<details><summary><b>Utily::TypeErasedVector</b></summary>
+
+A vector with no compile time enfored type. Access is checked in debug mode at runtime using Reflection.
+Useful for on the fly composing of types.
+```c++
+    auto vector = Utily::TypeErasedVector {};
+    vector.set_underlying_type<float>();
+
+    // these operations will throw in debug mode.
+    vector.emplace_back<int>(1);       
+    vector.emplace_back<double>(1);
+
+    vector.push_back<float>(0.0f);
+    vector.emplace_back<float>(1.0f);
+
+    // as_span<T> can throw if T != Underlying
+    for (float& v : vector.as_span<float>()) {
+        std::cout << v << ' ';
+    }
+```
+
+---
+
+</details>
+
 <details><summary><b>Utily::InlineArrays</b></summary>
 An allocator that will pack arrays together for optimal memory access.
 
@@ -139,31 +179,6 @@ auto [data2, ints2, bools2, chars2] = Utily::InlineArrays::alloc_copy(a, b, c);
 
 </details>
 
-<details><summary><b>Utily::AsyncFileReader</b></summary>
-
-An async file reader. Optimised for each supported system by using API calls. 
-
-```c++
-Utily::AsyncFileReader::push(STANFORD_BUNNY_PATH).on_error([](auto& e) { std::cerr << e.what(); });
-Utily::AsyncFileReader::push(SMALL_TEXT_PATH).on_error([](auto& e) { std::cerr << e.what(); });
-
-Utily::AsyncFileReader::wait_for_all();
-
-// 3 MB
-std::vector<char> bunny = Utily::AsyncFileReader::pop(STANFORD_BUNNY_PATH);
-// 38 Bytes
-std::vector<char> text  = Utily::AsyncFileReader::pop(SMALL_TEXT_PATH);
-```
-
-**Notes:** 
-- On windows it is run on the main thread.
-    *(Much faster than STL, and sometimes even faster than basic WIN32 as it is uses the Async WIN32 API.)*
-
----
-
-</details>
-
-
 
 <details><summary><b>Utily::Reflection</b></summary>
 
@@ -180,16 +195,29 @@ std::println("Name: {}", name); // Name: Foo
 
 </details>
 
-<details><summary><b>Utily::StaticVector</b></summary>
+<details><summary><b>Utily::Simd</b></summary>
 
-A stack based `std::vector` with a fixed capacity. Useful when you want to avoid heap allocations. 
+Simd optimised operations for supported algorithms. Mostly char searching at the moment.
+
 ```c++
-Utily::StaticVector<int, 10> s_vector{1, 2, 3, 4};
+
+const auto DELIMS = std::string_view { "azxy" };
+const auto STRING = std::string { "hello world! This is a sentenze" };
+
+auto iter1 = Utily::Simd::find(STRING.begin(), STRING.end(), DELIMS.front());
+
+auto iter2 = Utily::Simd::find_first_of(
+    STRING.begin(), STRING.end(), 
+    DELIMS.begin(), DELIMS.end()
+);
+
 ```
 
 ---
 
 </details>
+
+
 
 <details><summary><b>Utily::Concepts</b></summary>
 
