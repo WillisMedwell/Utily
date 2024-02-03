@@ -217,8 +217,8 @@ namespace Utily::Simd::Details {
 #if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
     UTY_ALWAYS_INLINE auto find_first_of_128(const char* src_begin, const size_t src_size, const char* value_begin, size_t value_size) -> std::ptrdiff_t {
         constexpr static size_t chars_per_vec = 128 / 8;
-
         constexpr static size_t max_values = 16;
+
         assert(value_size < max_values && "Exceeded values capacity, change Utily/Simd.cpp max_values for more.");
 
         const size_t max_i_clamped = src_size - (src_size % chars_per_vec);
@@ -269,6 +269,101 @@ namespace Utily::Simd::Details {
         return std::distance(src_begin, std::find_first_of(src_begin, src_begin + src_size, value_begin, value_begin + value_size));
 #endif
     }
+
+#if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128)
+    UTY_ALWAYS_INLINE auto find_subrange_128_4(const char* src_begin, const size_t src_size, const char* val_begin) -> std::ptrdiff_t {
+        constexpr static size_t chars_per_vec = 128 / 8;
+        const size_t num_vectorised_loops = src_size - (src_size % chars_per_vec);
+
+        int32_t val_i32 = *reinterpret_cast<const int32_t*>(val_begin);
+
+        const __m128i v = _mm_set1_epi32(val_i32);
+
+        for (size_t i = 0; i < num_vectorised_loops; i += chars_per_vec) {
+            const __m128i a =
+                _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i));
+            const __m128i b = _mm_lddqu_si128(
+                reinterpret_cast<const __m128i*>(src_begin + i + 1));
+            const __m128i c = _mm_lddqu_si128(
+                reinterpret_cast<const __m128i*>(src_begin + i + 2));
+            const __m128i d = _mm_lddqu_si128(
+                reinterpret_cast<const __m128i*>(src_begin + i + 3));
+
+            const auto av = _mm_cmpeq_epi32(a, v);
+            const auto bv = _mm_cmpeq_epi32(b, v);
+            const auto cv = _mm_cmpeq_epi32(c, v);
+            const auto dv = _mm_cmpeq_epi32(d, v);
+
+            const auto abcdv =
+                _mm_and_si128(_mm_and_si128(av, bv), _mm_and_si128(cv, dv));
+            const uint32_t mask =
+                std::bit_cast<uint32_t>(_mm_movemask_ps(_mm_castsi128_ps(abcdv)));
+            if (mask != 0) {
+                const int32_t mav = std::countr_zero(
+                    std::bit_cast<uint32_t>(_mm_movemask_ps(_mm_castsi128_ps(av))));
+                const int32_t mbv = std::countr_zero(std::bit_cast<uint32_t>(
+                                        _mm_movemask_ps(_mm_castsi128_ps(av))))
+                    + 1;
+                const int32_t mcv = std::countr_zero(std::bit_cast<uint32_t>(
+                                        _mm_movemask_ps(_mm_castsi128_ps(av))))
+                    + 2;
+                const int32_t mdv = std::countr_zero(std::bit_cast<uint32_t>(
+                                        _mm_movemask_ps(_mm_castsi128_ps(av))))
+                    + 3;
+                return static_cast<std::ptrdiff_t>(i) + std::min({ mav, mbv, mcv, mdv });
+            }
+        }
+
+        __m128i a = v;
+        __m128i b = v;
+        __m128i c = v;
+        __m128i d = v;
+
+        memcpy(reinterpret_cast<void*>(&a), (src_begin + num_vectorised_loops), src_size - num_vectorised_loops);
+        memcpy(reinterpret_cast<void*>(&b), (src_begin + num_vectorised_loops + 1), src_size - num_vectorised_loops - 1);
+        memcpy(reinterpret_cast<void*>(&c), (src_begin + num_vectorised_loops + 2), src_size - num_vectorised_loops - 2);
+        memcpy(reinterpret_cast<void*>(&d), (src_begin + num_vectorised_loops + 3), src_size - num_vectorised_loops - 3);
+
+        const auto av = _mm_cmpeq_epi32(a, v);
+        const auto bv = _mm_cmpeq_epi32(b, v);
+        const auto cv = _mm_cmpeq_epi32(c, v);
+        const auto dv = _mm_cmpeq_epi32(d, v);
+
+        const auto abcdv =
+            _mm_or_si128(_mm_or_si128(av, bv), _mm_or_si128(cv, dv));
+        const uint32_t mask =
+            std::bit_cast<uint32_t>(_mm_movemask_ps(_mm_castsi128_ps(abcdv)));
+
+        if (mask != 0) {
+            const int32_t mav = std::countr_zero(
+                std::bit_cast<uint32_t>(_mm_movemask_ps(_mm_castsi128_ps(av))));
+            const int32_t mbv = std::countr_zero(std::bit_cast<uint32_t>(
+                                    _mm_movemask_ps(_mm_castsi128_ps(av))))
+                + 1;
+            const int32_t mcv = std::countr_zero(std::bit_cast<uint32_t>(
+                                    _mm_movemask_ps(_mm_castsi128_ps(av))))
+                + 2;
+            const int32_t mdv = std::countr_zero(std::bit_cast<uint32_t>(
+                                    _mm_movemask_ps(_mm_castsi128_ps(av))))
+                + 3;
+            return static_cast<std::ptrdiff_t>(num_vectorised_loops) + std::min({ mav, mbv, mcv, mdv });
+        } else {
+            return static_cast<std::ptrdiff_t>(src_size);
+        }
+    }
+#endif
+    UTY_ALWAYS_INLINE auto find_subrange(const char* src_begin, const size_t src_size, const char* val_begin, const size_t val_size) -> std::ptrdiff_t {
+        if (val_size == 4) {
+#if defined(UTY_USE_SIMD_512) || defined(UTY_USE_SIMD_512)
+            return find_subrange_128_4(src_begin, src_size, val_begin);
+#else
+            return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
+#endif
+        }
+        assert(false && "not implemented");
+        return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
+    }
+
 }
 
 namespace Utily::Simd {
@@ -305,6 +400,21 @@ namespace Utily::Simd {
             return src_begin + Utily::Simd::Details::find_first_of(src, src_size, val, val_size);
         } else {
             return std::find_first_of(src_begin, src_end, value_begin, value_end);
+        }
+    }
+
+    template <std::contiguous_iterator SrcIter, std::contiguous_iterator ValIter>
+    UTY_ALWAYS_INLINE auto find_subrange(SrcIter src_begin, SrcIter src_end, ValIter value_begin, ValIter value_end) noexcept -> SrcIter {
+        if constexpr (sizeof(std::iter_value_t<SrcIter>) == 1 && sizeof(std::iter_value_t<ValIter>) == 1) {
+            auto src = reinterpret_cast<const char*>(&(*src_begin));
+            auto src_size = static_cast<size_t>(std::distance(src_begin, src_end));
+
+            auto val = reinterpret_cast<const char*>(&(*value_begin));
+            auto val_size = static_cast<size_t>(std::distance(value_begin, value_end));
+
+            return src_begin + Utily::Simd::Details::find_subrange(src, src_size, val, val_size);
+        } else {
+            return std::search(src_begin, src_end, value_begin, value_end);
         }
     }
 }

@@ -78,7 +78,7 @@ namespace Utily {
             , _data(nullptr) { }
 
         template <typename T>
-        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t) noexcept
+        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t [[maybe_unused]]) noexcept
             : _type_name(Utily::Reflection::get_type_name<T>())
             , _type_alignment(alignof(T))
             , _type_size(sizeof(T))
@@ -89,7 +89,7 @@ namespace Utily {
         }
 
         template <typename T>
-        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t, size_t n) 
+        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t [[maybe_unused]], size_t n) 
             : _type_name(Utily::Reflection::get_type_name<T>())
             , _type_alignment(alignof(T))
             , _type_size(sizeof(T))

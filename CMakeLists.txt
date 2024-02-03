@@ -59,6 +59,7 @@ if(BUILD_UTILY_TESTS)
         target_compile_options(UtilyTest PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
         target_compile_options(UtilyTest PRIVATE -march=native)
     endif()
+    target_compile_options(UtilyTest PRIVATE -g)
 
     target_link_libraries(UtilyTest PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main Utily::Utily)
     enable_testing()
