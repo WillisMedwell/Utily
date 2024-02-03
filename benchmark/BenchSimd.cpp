@@ -12,11 +12,14 @@
 #include <numeric>
 #include <ranges>
 
+#if 1 
+
 auto all_a(size_t max) -> std::string {
     std::string v;
     v.resize(max);
     std::fill(v.begin(), v.end(), 'a');
     v.append("a");
+    v.append("stri");
     return v;
 }
 const static std::string LONG_STRING = all_a(10000);
@@ -28,6 +31,7 @@ auto iota(size_t max) -> std::vector<int32_t> {
     return v;
 }
 const static std::vector<int32_t> NUMS = iota(10000);
+
 
 static void BM_Utily_Simd_find_char(benchmark::State& state) {
     for (auto _ : state) {
@@ -70,10 +74,42 @@ static void BM_Utily_Simd_find_int32(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Utily_Simd_find_int32);
-static void BM_Utily_Std_find_int32(benchmark::State& state) {
+
+static void BM_Std_find_int32(benchmark::State& state) {
     for (auto _ : state) {
         volatile auto iter = std::find(NUMS.begin(), NUMS.begin(), NUMS.back());
         benchmark::DoNotOptimize(iter);
     }
 }
-BENCHMARK(BM_Utily_Std_find_int32);
+BENCHMARK(BM_Std_find_int32);
+
+
+static void BM_Utily_find_subrange_char_4letters(benchmark::State& state) {
+    std::string_view find = "stri";
+    for (auto _ : state) {
+        volatile auto iter = Utily::Simd::find_subrange(
+            LONG_STRING.begin(),
+            LONG_STRING.end(),
+            find.begin(),
+            find.end());
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_Utily_find_subrange_char_4letters);
+
+
+
+static void BM_std_find_subrange_char_4letters(benchmark::State& state) {
+    std::string_view find = "stri";
+    for (auto _ : state) {
+        volatile auto iter = std::search(
+            LONG_STRING.begin(),
+            LONG_STRING.end(),
+            find.begin(),
+            find.end());
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_std_find_subrange_char_4letters);
+
+#endif

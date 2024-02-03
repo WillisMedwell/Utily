@@ -6,6 +6,8 @@
 constexpr int N = 100;
 using T = std::vector<int>;
 
+
+#if 1
 static void BM_StaticVector_Construct(benchmark::State& state) {
     for (auto _ : state) {
         Utily::StaticVector<T, N> v;
@@ -13,8 +15,6 @@ static void BM_StaticVector_Construct(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_StaticVector_Construct);
-
-
 
 static void BM_StaticVector_PushBack(benchmark::State& state) {
     for (auto _ : state) {
@@ -106,3 +106,5 @@ static void BM_Array_Iterate(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Array_Iterate);
+
+#endif 

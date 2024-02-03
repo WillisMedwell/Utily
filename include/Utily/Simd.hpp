@@ -3,6 +3,8 @@
 #include <concepts>
 #include <ranges>
 
+#define UTY_USE_SIMD_128 1
+
 #include <algorithm>
 #include <bit>
 #include <bitset>
@@ -20,6 +22,9 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+
+
+
 
 // Check for SSE support
 #if defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__)
@@ -55,6 +60,26 @@
 #elif UTY_SUPPORTS_128
 #define UTY_USE_SIMD_128
 #endif
+#endif
+
+#ifdef UTY_USE_SIMD_512
+#include <immintrin.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
+#include <xmmintrin.h>
+#endif
+
+#ifdef UTY_USE_SIMD_256
+#include <immintrin.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
+#include <xmmintrin.h>
+#endif
+
+#ifdef UTY_USE_SIMD_128
+#include <emmintrin.h>
+#include <pmmintrin.h>
+#include <xmmintrin.h>
 #endif
 
 namespace Utily::Simd::Details {
@@ -197,12 +222,12 @@ namespace Utily::Simd::Details {
     }
 #endif // SUPPORTS_XXX
     UTY_ALWAYS_INLINE auto find(const int32_t* src_begin, const size_t src_size, int32_t value) noexcept -> std::ptrdiff_t {
-#if defined(UTY_USE_SIMD_512) || defined(UTY_USE_SIMD_512)
+#if defined(UTY_USE_SIMD_512) || UTY_SUPPORTS_512
         return find_512(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_256) || defined(UTY_USE_SIMD_256)
-        // TODO
-        return find_128(src_begin, src_size, value);
-#elif defined(UTY_USE_SIMD_128) || defined(UTY_USE_SIMD_128)
+//#elif defined(UTY_USE_SIMD_256) || UTY_SUPPORTS_256
+//        // TODO
+//        return find_128(src_begin, src_size, value);
+#elif defined(UTY_USE_SIMD_128) || UTY_SUPPORTS_128
         return find_128(src_begin, src_size, value);
 #elif defined(UTY_NO_SIMD)
         return std::distance(src_begin, std::find(src_begin, src_begin + src_size, value));
@@ -354,13 +379,14 @@ namespace Utily::Simd::Details {
 #endif
     UTY_ALWAYS_INLINE auto find_subrange(const char* src_begin, const size_t src_size, const char* val_begin, const size_t val_size) -> std::ptrdiff_t {
         if (val_size == 4) {
-#if defined(UTY_USE_SIMD_512) || defined(UTY_USE_SIMD_512)
+//#if UTY_SUPPORTS_128 || defined(UTY_USE_SIMD_128) 
             return find_subrange_128_4(src_begin, src_size, val_begin);
-#else
-            return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
-#endif
+//#else
+//            return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
+//#endif
         }
-        assert(false && "not implemented");
+        throw std::runtime_error("not implemented");
+        // assert(false && "not implemented");
         return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
     }
 
