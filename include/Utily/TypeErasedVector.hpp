@@ -41,12 +41,12 @@ namespace Utily {
 #ifdef _MSC_VER
                 void* new_data = _aligned_realloc(
                     _data,
-                    _type_size * (_data_capacity * 2),
+                    _type_size * (static_cast<size_t>(_data_capacity) * 2),
                     _type_alignment);
 #else
                 void* new_data = std::realloc(
                     _data,
-                    _type_size * (_data_capacity * 2));
+                    _type_size * (static_cast<size_t>(_data_capacity) * 2);
 #endif
                 if (new_data != nullptr) {
                     _data = new_data;
@@ -138,7 +138,7 @@ namespace Utily {
             assert(Utily::Reflection::get_type_name<T>() == _type_name);
             ensure_pushable_capacity();
             std::construct_at(
-                reinterpret_cast<T*>(static_cast<std::byte*>(_data) + (_data_size * _type_size)),
+                reinterpret_cast<T*>(static_cast<std::byte*>(_data) + (_data_size * static_cast<std::ptrdiff_t>(_type_size))),
                 std::forward<T>(t));
             ++_data_size;
         }
@@ -149,7 +149,7 @@ namespace Utily {
             assert(Utily::Reflection::get_type_name<T>() == _type_name);
             ensure_pushable_capacity();
             std::construct_at(
-                reinterpret_cast<T*>(static_cast<std::byte*>(_data) + (_data_size * _type_size)),
+                reinterpret_cast<T*>(static_cast<std::byte*>(_data) + (_data_size * static_cast<std::ptrdiff_t>(_type_size))),
                 std::forward<Args>(args)...);
             ++_data_size;
         }
@@ -164,7 +164,7 @@ namespace Utily {
             assert(index < _data_size);
 
             return static_cast<void*>(
-                static_cast<int8_t*>(_data) + (index * _type_size));
+                static_cast<int8_t*>(_data) + (index * static_cast<std::ptrdiff_t>(_type_size)));
         }
 
         template <typename T>
@@ -175,9 +175,9 @@ namespace Utily {
             return *reinterpret_cast<T*>(static_cast<int8_t*>(_data) + (index * _type_size));
         }
 
-        [[nodiscard]] UTY_ALWAYS_INLINE auto size() const noexcept { return _data_size; }
-        [[nodiscard]] UTY_ALWAYS_INLINE auto size_bytes() const noexcept { return _data_size * _type_size; }
-        [[nodiscard]] UTY_ALWAYS_INLINE auto capacity() const noexcept { return _data_capacity; }
+        [[nodiscard]] UTY_ALWAYS_INLINE auto size() const noexcept { return static_cast<size_t>(_data_size); }
+        [[nodiscard]] UTY_ALWAYS_INLINE auto size_bytes() const noexcept { return static_cast<size_t>(_data_size) * _type_size; }
+        [[nodiscard]] UTY_ALWAYS_INLINE auto capacity() const noexcept { return static_cast<size_t>(_data_capacity); }
 
         template <typename T>
         [[nodiscard]] auto UTY_ALWAYS_INLINE as_span() -> std::span<T> {
@@ -188,8 +188,8 @@ namespace Utily {
         UTY_ALWAYS_INLINE void resize(size_t n) {
             assert(_type_size != 0);
 
-            if (n <= _data_capacity) {
-                _data_size = n;
+            if (n <= static_cast<size_t>(_data_capacity)) {
+                _data_size = static_cast<std::ptrdiff_t>(n);
                 return;
             }
 
@@ -218,8 +218,8 @@ namespace Utily {
                     throw std::bad_alloc();
                 }
             }
-            _data_capacity = n;
-            _data_size = n;
+            _data_capacity = static_cast<std::ptrdiff_t>(n);
+            _data_size = static_cast<std::ptrdiff_t>(n);
             return;
         }
     };

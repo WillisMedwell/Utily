@@ -59,11 +59,12 @@ namespace Utily {
                 constexpr auto operator++() noexcept -> Iterator& {
                     if (current_end != end) {
                         current_begin = std::find_if_not(current_end, end, [&](auto element) { return element == delim; });
-                        if constexpr (std::same_as<Delim, char>) {
-                            current_end = Utily::Simd::find(current_begin, end, delim);
-                        } else {
+                        /*if constexpr (std::same_as<Delim, char>) {
+                            TODO
+                            current_end = Utily::Simd128::Char::find(current_begin, current_begin, delim) + current_begin;
+                        } else {*/
                             current_end = std::find(current_begin, end, delim);
-                        }
+                        //}
                     } else {
                         current_begin = end;
                     }
