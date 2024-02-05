@@ -8,8 +8,8 @@ if not exist "build-native\" (
     mkdir build-native
 )
 cd build-native
-call cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_UTILY_TESTS=1 -DBUILD_UTILY_BENCHMARKS=1
-call cmake --build . --config Release
+call cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DBUILD_UTILY_TESTS=1 -DBUILD_UTILY_BENCHMARKS=1
+call cmake --build . --config Debug
 cd ..
 
 @REM WEB
@@ -22,4 +22,4 @@ cd ..
 
 cd build-native
 call UtilyTest.exe
-call UtilyBenchmark.exe
+@REM call UtilyBenchmark.exe

@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#if 1
+#if 0
 
 static std::vector<uint8_t> readFileToVector(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::binary);

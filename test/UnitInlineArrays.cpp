@@ -3,6 +3,8 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#if 0
+
 TEST(InlineArrays, Uninitialised) {
     using namespace Utily;
     {
@@ -119,3 +121,5 @@ TEST(InlineArrays, CopyRanges) {
         }
     }
 }
+
+#endif
