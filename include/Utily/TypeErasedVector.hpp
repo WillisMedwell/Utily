@@ -46,7 +46,8 @@ namespace Utily {
 #else
                 void* new_data = std::realloc(
                     _data,
-                    _type_size * (static_cast<size_t>(_data_capacity) * 2);
+                    _type_size * (static_cast<size_t>(_data_capacity) * 2)
+                    );
 #endif
                 if (new_data != nullptr) {
                     _data = new_data;

@@ -140,7 +140,7 @@ namespace Utily::Simd128 {
         }
 
         template <size_t ValSize>
-        UTY_ALWAYS_INLINE auto search(const char* src_begin, const size_t src_size, const char* val_begin) noexcept -> std::ptrdiff_t {
+        UTY_ALWAYS_INLINE auto search(const char* src_begin [[maybe_unused]], const size_t src_size [[maybe_unused]], const char* val_begin [[maybe_unused]]) noexcept -> std::ptrdiff_t {
             // static_assert(false, "Not implemented");
             assert(false && "Not implemeted");
         }
