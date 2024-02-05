@@ -123,9 +123,7 @@ namespace Utily {
     }
 }
 */
-
 #else
-#warning "Platform is not optimised for file reading."
 
 #include <cstdio>
 
