@@ -12,10 +12,14 @@ jobs:
 
     - name: Build With GCC
       run: |
-        cmake --preset gcc-ninja
-        cmake --build ./build/gcc-ninja --config Release
+        cmake --preset gcc-ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build ./build/gcc-ninja --target UtilyTest --config Debug
+        cmake --build ./build/gcc-ninja --target UtilyBenchmark --config Release
 
     - name: Run Tests
       run: |
         ./build/gcc-ninja/UtilyTest
+
+    - name: Run Benchmarks  
+      run: | 
         ./build/gcc-ninja/UtilyBenchmark

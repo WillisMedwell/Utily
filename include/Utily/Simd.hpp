@@ -10,6 +10,7 @@
 #include <iostream>
 #include <ranges>
 #include <type_traits>
+#include <vector>
 
 #if defined(__GNUC__) || defined(__clang__)
 #define UTY_ALWAYS_INLINE __attribute__((always_inline)) inline
@@ -25,18 +26,20 @@
 #include <pmmintrin.h>
 #include <smmintrin.h>
 #include <xmmintrin.h>
+#include <immintrin.h>
+
 namespace Utily::Simd128 {
     namespace Char {
         UTY_ALWAYS_INLINE static auto find(const char* src_begin, const size_t src_size, const char val) noexcept -> std::ptrdiff_t {
-            constexpr static size_t chars_per_vec = 128 / 8;
+            constexpr static int64_t chars_per_vec = 128 / 8;
 
             const __m128i v = _mm_set1_epi8(val);
 
             const std::ptrdiff_t max_i_clamped = static_cast<std::ptrdiff_t>(src_size - (src_size % chars_per_vec));
-            const std::ptrdiff_t max_4_i_count = static_cast<std::ptrdiff_t>(max_i_clamped - (max_i_clamped % 4));
+            const std::ptrdiff_t max_4_i_count = max_i_clamped - (max_i_clamped % 4);
 
             // This loop is here to make the most of throughput
-            for (std::ptrdiff_t i = 0; i < max_4_i_count; i += (chars_per_vec * 4)) {
+            for (std::ptrdiff_t i = 0; i < max_4_i_count; i += (chars_per_vec * std::ptrdiff_t{4})) {
                 // 6 + (0.33 * 4) ~= 7.33 for 4 loads instead of 6.33 for 1 load.
                 const __m128i c0 = _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i));
                 const __m128i c1 = _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i + max_i_clamped));
@@ -143,20 +146,24 @@ namespace Utily::Simd128 {
         UTY_ALWAYS_INLINE auto search(const char* src_begin [[maybe_unused]], const size_t src_size [[maybe_unused]], const char* val_begin [[maybe_unused]]) noexcept -> std::ptrdiff_t {
             // static_assert(false, "Not implemented");
             assert(false && "Not implemeted");
+            return std::ptrdiff_t{0};
         }
 
         template <>
         UTY_ALWAYS_INLINE auto search<4>(const char* src_begin, const size_t src_size, const char* val_begin) noexcept -> std::ptrdiff_t {
-            constexpr static size_t chars_per_vec = 128 / 8;
-            const size_t num_vectorised_loops = src_size - (src_size % chars_per_vec) - 3;
+            constexpr static uint64_t chars_per_vec = 128 / 8;
+
+            const int64_t ssrc_size = static_cast<int64_t>(src_size);
+            const int64_t lhs = ssrc_size - (ssrc_size % static_cast<int64_t>(chars_per_vec)) - 3;
+            const int64_t num_vectorised_loops = std::max({ lhs, static_cast<int64_t>(0) });
+            const uint64_t num_vectorised_loops_u = static_cast<uint64_t>(num_vectorised_loops);
+
 
             int32_t val_i32 = *reinterpret_cast<const int32_t*>(val_begin);
 
             const __m128i v = _mm_set1_epi32(val_i32);
 
-            for (size_t i = 3; i < num_vectorised_loops; i += chars_per_vec) {
-                auto upper = i + chars_per_vec;
-                // assert(upper < src_size);
+            for (uint64_t i = 3; i < num_vectorised_loops_u; i += chars_per_vec) {
 
                 const __m128i d[4] = {
                     _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 3)),
@@ -191,74 +198,80 @@ namespace Utily::Simd128 {
                         (std::countr_zero(std::bit_cast<uint32_t>(mm[2])) * 4) - 1,
                         (std::countr_zero(std::bit_cast<uint32_t>(mm[3])) * 4) - 0
                     };
-                    auto res = static_cast<std::ptrdiff_t>(i) + std::min({ cz[0], cz[1], cz[2], cz[3] });
-                    return std::min(res, static_cast<std::ptrdiff_t>(src_size));
+                    std::ptrdiff_t res = static_cast<std::ptrdiff_t>(i) + std::min({ cz[0], cz[1], cz[2], cz[3] });
+                    return std::min(res, static_cast<std::ptrdiff_t>(ssrc_size));
                 }
             }
 
-            __m128i d[4] = {
-                _mm_setzero_si128(),
-                _mm_setzero_si128(),
-                _mm_setzero_si128(),
-                _mm_setzero_si128()
-            };
-
-            memcpy(&d[0], (src_begin + num_vectorised_loops + 0), src_size - num_vectorised_loops - 0);
-            memcpy(&d[1], (src_begin + num_vectorised_loops + 1), src_size - num_vectorised_loops - 1);
-            memcpy(&d[2], (src_begin + num_vectorised_loops + 2), src_size - num_vectorised_loops - 2);
-            memcpy(&d[3], (src_begin + num_vectorised_loops + 3), src_size - num_vectorised_loops - 3);
-
-            const __m128i cmpeq[4] = {
-                _mm_cmpeq_epi32(d[0], v),
-                _mm_cmpeq_epi32(d[1], v),
-                _mm_cmpeq_epi32(d[2], v),
-                _mm_cmpeq_epi32(d[3], v)
-            };
-
-            const int32_t any_eq = _mm_movemask_ps(_mm_castsi128_ps(
-                _mm_or_si128(
-                    _mm_or_si128(cmpeq[0], cmpeq[1]),
-                    _mm_or_si128(cmpeq[2], cmpeq[3]))));
-
-            if (any_eq) {
-                const int32_t mm[4] = {
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[0])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[1])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[2])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[3]))
+            {
+                __m128i d[4] = {
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128(),
+                    _mm_setzero_si128()
                 };
-                const int32_t cz[4] = {
-                    (std::countr_zero(std::bit_cast<uint32_t>(mm[0])) * 4) + 0,
-                    (std::countr_zero(std::bit_cast<uint32_t>(mm[1])) * 4) + 1,
-                    (std::countr_zero(std::bit_cast<uint32_t>(mm[2])) * 4) + 2,
-                    (std::countr_zero(std::bit_cast<uint32_t>(mm[3])) * 4) + 3
+
+                memcpy(&d[0], (src_begin + num_vectorised_loops + 0), static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{0}));
+                memcpy(&d[1], (src_begin + num_vectorised_loops + 1), static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{1}));
+                memcpy(&d[2], (src_begin + num_vectorised_loops + 2), static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{2}));
+                memcpy(&d[3], (src_begin + num_vectorised_loops + 3), static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{3}));
+
+                const __m128i cmpeq[4] = {
+                    _mm_cmpeq_epi32(d[0], v),
+                    _mm_cmpeq_epi32(d[1], v),
+                    _mm_cmpeq_epi32(d[2], v),
+                    _mm_cmpeq_epi32(d[3], v)
                 };
-                const auto min = std::min({ cz[0], cz[1], cz[2], cz[3] });
-                const auto res = static_cast<std::ptrdiff_t>(num_vectorised_loops) + min;
-                return std::min(res, static_cast<std::ptrdiff_t>(src_size));
+
+                const int32_t any_eq = _mm_movemask_ps(_mm_castsi128_ps(
+                    _mm_or_si128(
+                        _mm_or_si128(cmpeq[0], cmpeq[1]),
+                        _mm_or_si128(cmpeq[2], cmpeq[3]))));
+
+                if (any_eq) {
+                    const int32_t mm[4] = {
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[0])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[1])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[2])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[3]))
+                    };
+                    const int32_t cz[4] = {
+                        (std::countr_zero(std::bit_cast<uint32_t>(mm[0])) * 4) + 0,
+                        (std::countr_zero(std::bit_cast<uint32_t>(mm[1])) * 4) + 1,
+                        (std::countr_zero(std::bit_cast<uint32_t>(mm[2])) * 4) + 2,
+                        (std::countr_zero(std::bit_cast<uint32_t>(mm[3])) * 4) + 3
+                    };
+                    const auto min = std::min({ cz[0], cz[1], cz[2], cz[3] });
+                    const auto res = static_cast<std::ptrdiff_t>(num_vectorised_loops) + min;
+                    return std::min(res, static_cast<std::ptrdiff_t>(src_size));
+                }
+                return static_cast<std::ptrdiff_t>(src_size);
             }
-            return static_cast<std::ptrdiff_t>(src_size);
         }
 
         template <>
         UTY_ALWAYS_INLINE auto search<8>(const char* src_begin, const size_t src_size, const char* val_begin) noexcept -> std::ptrdiff_t {
-            constexpr static size_t chars_per_vec = 128 / 8;
-            const size_t num_vectorised_loops = src_size - (src_size % chars_per_vec);
+            assert(src_begin != nullptr);
+
+            constexpr static uint64_t chars_per_vec = 128 / 8;
+            const int64_t ssrc_size = static_cast<int64_t>(src_size);
+            const int64_t lhs = ssrc_size - (ssrc_size % static_cast<int64_t>(chars_per_vec)) - 7;
+            const int64_t num_vectorised_loops = std::max({ lhs, static_cast<int64_t>(0) });
+            const uint64_t num_vectorised_loops_u = static_cast<uint64_t>(num_vectorised_loops);
 
             int64_t val_i64 = *reinterpret_cast<const int64_t*>(val_begin);
-
             const __m128i v = _mm_set1_epi64x(val_i64);
-
-            for (size_t i = 0; i < num_vectorised_loops; i += chars_per_vec) {
+  
+            for (uint64_t i = 7; i < num_vectorised_loops_u; i += chars_per_vec) {
                 const __m128i d[8] = {
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 0),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 1),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 2),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 3),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 4),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 5),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 6),
-                    *reinterpret_cast<const __m128i*>(src_begin + i + 7)
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 7)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 6)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 5)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 4)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 3)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 2)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 1)),
+                    _mm_lddqu_si128(reinterpret_cast<const __m128i*>(src_begin + i - 0))
                 };
 
                 const __m128i cmpeq[8] = {
@@ -269,7 +282,7 @@ namespace Utily::Simd128 {
                     _mm_cmpeq_epi64(d[4], v),
                     _mm_cmpeq_epi64(d[5], v),
                     _mm_cmpeq_epi64(d[6], v),
-                    _mm_cmpeq_epi64(d[7], v),
+                    _mm_cmpeq_epi64(d[7], v)
                 };
 
                 const int32_t any_eq =
@@ -294,82 +307,93 @@ namespace Utily::Simd128 {
                         _mm_movemask_ps(_mm_castsi128_ps(cmpeq[7]))
                     };
 
-                    const int32_t cz[8] = {
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[0])) + 0,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[1])) + 1,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[2])) + 2,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[3])) + 3,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[4])) + 4,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[5])) + 5,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[6])) + 6,
-                        std::countr_zero(std::bit_cast<uint32_t>(mm[7])) + 7
+                    const int64_t cz[8] = {
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[0]))) * 4 - 7,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[1]))) * 4 - 6,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[2]))) * 4 - 5,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[3]))) * 4 - 4,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[4]))) * 4 - 3,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[5]))) * 4 - 2,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[6]))) * 4 - 1,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[7]))) * 4 - 0
                     };
 
-                    return static_cast<std::ptrdiff_t>(i) + std::min({ cz[0], cz[1], cz[2], cz[3], cz[4], cz[5], cz[6], cz[7] });
+                    std::ptrdiff_t res = static_cast<int64_t>(i) + std::min({ cz[0], cz[1], cz[2], cz[3], cz[4], cz[5], cz[6], cz[7] });
+                    assert(std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + 8)) == res);
+                    return res;
                 }
             }
 
-            __m128i d[8] = { v, v, v, v, v, v, v, v };
+            {
+                __m128i d[8] = {};
 
-            memcpy(&d[0], (src_begin + num_vectorised_loops + 0), src_size - num_vectorised_loops - 0);
-            memcpy(&d[1], (src_begin + num_vectorised_loops + 1), src_size - num_vectorised_loops - 1);
-            memcpy(&d[2], (src_begin + num_vectorised_loops + 2), src_size - num_vectorised_loops - 2);
-            memcpy(&d[3], (src_begin + num_vectorised_loops + 3), src_size - num_vectorised_loops - 3);
-            memcpy(&d[4], (src_begin + num_vectorised_loops + 4), src_size - num_vectorised_loops - 4);
-            memcpy(&d[5], (src_begin + num_vectorised_loops + 5), src_size - num_vectorised_loops - 5);
-            memcpy(&d[6], (src_begin + num_vectorised_loops + 6), src_size - num_vectorised_loops - 6);
-            memcpy(&d[7], (src_begin + num_vectorised_loops + 7), src_size - num_vectorised_loops - 7);
+                memcpy(&d[0], src_begin + num_vectorised_loops + 0, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{0}));
+                memcpy(&d[1], src_begin + num_vectorised_loops + 1, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{1}));
+                memcpy(&d[2], src_begin + num_vectorised_loops + 2, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{2}));
+                memcpy(&d[3], src_begin + num_vectorised_loops + 3, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{3}));
+                memcpy(&d[4], src_begin + num_vectorised_loops + 4, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{4}));
+                memcpy(&d[5], src_begin + num_vectorised_loops + 5, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{5}));
+                memcpy(&d[6], src_begin + num_vectorised_loops + 6, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{6}));
+                memcpy(&d[7], src_begin + num_vectorised_loops + 7, static_cast<size_t>(ssrc_size - num_vectorised_loops - int64_t{7}));
 
-            const __m128i cmpeq[8] = {
-                _mm_cmpeq_epi64(d[0], v),
-                _mm_cmpeq_epi64(d[1], v),
-                _mm_cmpeq_epi64(d[2], v),
-                _mm_cmpeq_epi64(d[3], v),
-                _mm_cmpeq_epi64(d[4], v),
-                _mm_cmpeq_epi64(d[5], v),
-                _mm_cmpeq_epi64(d[6], v),
-                _mm_cmpeq_epi64(d[7], v),
-            };
-
-            const int any_eq =
-                _mm_movemask_ps(_mm_castsi128_ps(
-                    _mm_or_si128(
-                        _mm_or_si128(
-                            _mm_or_si128(cmpeq[0], cmpeq[1]),
-                            _mm_or_si128(cmpeq[2], cmpeq[3])),
-                        _mm_or_si128(
-                            _mm_or_si128(cmpeq[4], cmpeq[5]),
-                            _mm_or_si128(cmpeq[6], cmpeq[7])))));
-
-            if (any_eq) {
-                const int32_t mm[8] = {
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[0])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[1])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[2])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[3])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[4])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[5])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[6])),
-                    _mm_movemask_ps(_mm_castsi128_ps(cmpeq[7]))
+                const __m128i cmpeq[8] = {
+                    _mm_cmpeq_epi64(d[0], v),
+                    _mm_cmpeq_epi64(d[1], v),
+                    _mm_cmpeq_epi64(d[2], v),
+                    _mm_cmpeq_epi64(d[3], v),
+                    _mm_cmpeq_epi64(d[4], v),
+                    _mm_cmpeq_epi64(d[5], v),
+                    _mm_cmpeq_epi64(d[6], v),
+                    _mm_cmpeq_epi64(d[7], v),
                 };
 
-                const int32_t cz[8] = {
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[0])) + 0,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[1])) + 1,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[2])) + 2,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[3])) + 3,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[4])) + 4,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[5])) + 5,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[6])) + 6,
-                    std::countr_zero(std::bit_cast<uint32_t>(mm[7])) + 7
-                };
+                const int any_eq =
+                    _mm_movemask_ps(_mm_castsi128_ps(
+                        _mm_or_si128(
+                            _mm_or_si128(
+                                _mm_or_si128(cmpeq[0], cmpeq[1]),
+                                _mm_or_si128(cmpeq[2], cmpeq[3])),
+                            _mm_or_si128(
+                                _mm_or_si128(cmpeq[4], cmpeq[5]),
+                                _mm_or_si128(cmpeq[6], cmpeq[7])))));
 
-                return static_cast<std::ptrdiff_t>(num_vectorised_loops) + std::min({ cz[0], cz[1], cz[2], cz[3], cz[4], cz[5], cz[6], cz[7] });
+                if (any_eq) {
+                    const int32_t mm[8] = {
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[0])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[1])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[2])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[3])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[4])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[5])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[6])),
+                        _mm_movemask_ps(_mm_castsi128_ps(cmpeq[7]))
+                    };
+
+                    const int64_t cz[8] = {
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[0]))) * 4 + 0,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[1]))) * 4 + 1,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[2]))) * 4 + 2,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[3]))) * 4 + 3,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[4]))) * 4 + 4,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[5]))) * 4 + 5,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[6]))) * 4 + 6,
+                        static_cast<int64_t>(std::countr_zero(std::bit_cast<uint32_t>(mm[7]))) * 4 + 7
+                    };
+                    auto min = std::min({ cz[0], cz[1], cz[2], cz[3], cz[4], cz[5], cz[6], cz[7], ssrc_size - num_vectorised_loops });
+                    auto res = static_cast<std::ptrdiff_t>(num_vectorised_loops) + min;
+                    assert(std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + 8)) == res);
+                    return res;
+                }
+                return static_cast<std::ptrdiff_t>(src_size);
             }
-            return static_cast<std::ptrdiff_t>(src_size);
         }
 
         UTY_ALWAYS_INLINE auto search(const char* src_begin, const size_t src_size, const char* val_begin, const size_t val_size) noexcept -> std::ptrdiff_t {
+            assert(src_begin != nullptr);
+            if (src_size < val_size) {
+                return static_cast<std::ptrdiff_t>(src_size);
+            }
+
             if (val_size == 4) {
                 return search<4>(src_begin, src_size, val_begin);
             } else if (val_size == 8) {

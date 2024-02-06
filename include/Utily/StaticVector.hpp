@@ -39,7 +39,7 @@ namespace Utily {
             constexpr ~InternalT() { }
         };
 
-        InternalT _data[static_cast<int64_t>(S)];
+        InternalT _data[static_cast<uint64_t>(S)];
         std::ptrdiff_t _size;
 
     public:

@@ -68,23 +68,6 @@ static void BM_Std_find_first_of_chars(benchmark::State& state) {
 }
 BENCHMARK(BM_Std_find_first_of_chars);
 
-// static void BM_Uty_find_int32(benchmark::State& state) {
-//     for (auto _ : state) {
-//         volatile auto iter = Utily::Simd128::Char::find(NUMS.data(), NUMS.size(), NUMS.back());
-//         benchmark::DoNotOptimize(iter);
-//     }
-// }
-// BENCHMARK(BM_Uty_find_int32);
-
-// static void BM_Std_find_int32(benchmark::State& state) {
-//     for (auto _ : state) {
-//         volatile auto iter = std::find(NUMS.begin(), NUMS.begin(), NUMS.back());
-//         benchmark::DoNotOptimize(iter);
-//     }
-// }
-// BENCHMARK(BM_Std_find_int32);
-
-
 static void BM_Uty_search_char_4letters(benchmark::State& state) {
     std::string_view find = "stri";
     for (auto _ : state) {
@@ -113,15 +96,15 @@ BENCHMARK(BM_Std_search_char_4letters);
 
 
 static void BM_Uty_search_char_8letters(benchmark::State& state) {
-    std::string_view find = "stringer";
-    for (auto _ : state) {
-        volatile auto iter = Utily::Simd128::Char::search(
-            LONG_STRING.data(),
-            LONG_STRING.size(),
-            find.data(),
-            find.size());
-        benchmark::DoNotOptimize(iter);
-    }
+   std::string_view find = "stringer";
+   for (auto _ : state) {
+       volatile auto iter = Utily::Simd128::Char::search(
+           LONG_STRING.data(),
+           LONG_STRING.size(),
+           find.data(),
+           find.size());
+       benchmark::DoNotOptimize(iter);
+   }
 }
 BENCHMARK(BM_Uty_search_char_8letters);
 

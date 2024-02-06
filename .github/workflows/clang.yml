@@ -13,10 +13,15 @@ jobs:
 
     - name: Build With Clang
       run: |
-        cmake --preset clang-ninja
-        cmake --build ./build/clang-ninja --config Release
+        cmake --preset clang-ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build ./build/clang-ninja --target UtilyTest --config Debug
+        cmake --build ./build/clang-ninja --target UtilyBenchmark --config Release
+
 
     - name: Run Tests
       run: |
         ./build/clang-ninja/UtilyTest
+
+    - name: Run Benchmarks  
+      run: | 
         ./build/clang-ninja/UtilyBenchmark

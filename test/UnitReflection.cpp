@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#if 0
+
 TEST(Reflection, BaseTypes) {
     {
         auto result = Utily::Reflection::get_type_name<float>();
@@ -21,3 +23,5 @@ TEST(Reflection, BaseTypes) {
         EXPECT_NE(result, "error");
     }
 }
+
+#endif

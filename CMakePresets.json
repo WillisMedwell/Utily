@@ -31,7 +31,6 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/clang-ninja",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_UTILY_TESTS": "ON",
                 "BUILD_UTILY_BENCHMARKS": "ON",
                 "HAVE_STEADY_CLOCK": "0",
