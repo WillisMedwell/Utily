@@ -1,8 +1,3 @@
-
-#ifndef EMSCRIPTEN
-#include "stringzilla.h"
-#endif
-
 #include "Utily/Utily.hpp"
 
 #include <benchmark/benchmark.h>
@@ -11,6 +6,12 @@
 #include <array>
 #include <numeric>
 #include <ranges>
+
+#ifndef EMSCRIPTEN
+extern "C" {
+#include "stringzilla.h"
+}
+#endif
 
 #if 1
 
@@ -67,7 +68,6 @@ static void BM_Uty_find_first_of_char(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_find_first_of_char);
-
 
 static void BM_Std_find_first_of_chars(benchmark::State& state) {
     const auto data = std::to_array({ 'z', 'o', 'n' });
