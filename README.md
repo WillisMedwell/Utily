@@ -320,12 +320,12 @@ constexpr auto to_array(Args&&... args)
 
 **Clang (Server)** 
 
-| String Operation        | Std | StringZilla | Utily |
-| ----------------------- | --- | ----------- | ----- |
-| find                    |     |             |       |
-| find_first_of           |     |             |       |
-| find_substring(char[4]) |     |             |       |
-| find_substring(char[8]) |     |             |       |
+| String Operation        | Std    | StringZilla | Utily      |
+| ----------------------- | ------ | ----------- | ---------- |
+| find                    | 205 ns | **124 ns**  | 203 ns     |
+| find_first_of           | 630 ns |             | **324 ns** |
+| find_substring(char[4]) | 243 ns | 646 ns      | **205 ns** |
+| find_substring(char[8]) | 254 ns | 1250 ns     | **207 ns** |
 
 
 **Emscripten**
