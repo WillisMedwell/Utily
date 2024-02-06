@@ -1,7 +1,7 @@
-// #define UTY_NO_SIMD
-// #define UTY_USE_SIMD_128
-// #define UTY_USE_SIMD_256
-// #define UTY_USE_SIMD_512
+
+#ifndef EMSCRIPTEN
+#include "stringzilla.h"
+#endif
 
 #include "Utily/Utily.hpp"
 
@@ -12,7 +12,7 @@
 #include <numeric>
 #include <ranges>
 
-#if 1 
+#if 1
 
 auto all_a(size_t max) -> std::string {
     std::string v;
@@ -22,7 +22,7 @@ auto all_a(size_t max) -> std::string {
     v.append("stringer");
     return v;
 }
-const static std::string LONG_STRING = all_a(10000);
+const static std::string LONG_STRING = all_a(1000);
 
 auto iota(size_t max) -> std::vector<int32_t> {
     std::vector<int32_t> v;
@@ -32,7 +32,6 @@ auto iota(size_t max) -> std::vector<int32_t> {
 }
 const static std::vector<int32_t> NUMS = iota(10000);
 
-
 static void BM_Uty_find_char(benchmark::State& state) {
     for (auto _ : state) {
         volatile auto iter = Utily::Simd128::Char::find(LONG_STRING.data(), LONG_STRING.size(), 'z');
@@ -40,6 +39,17 @@ static void BM_Uty_find_char(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_find_char);
+
+#ifndef EMSCRIPTEN
+static void BM_Zil_find_char(benchmark::State& state) {
+    auto delim = 'z';
+    for (auto _ : state) {
+        volatile auto iter = sz_find_1char(LONG_STRING.data(), LONG_STRING.size(), &delim);
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_Zil_find_char);
+#endif
 
 static void BM_Std_find_char(benchmark::State& state) {
     for (auto _ : state) {
@@ -49,7 +59,6 @@ static void BM_Std_find_char(benchmark::State& state) {
 }
 BENCHMARK(BM_Std_find_char);
 
-
 static void BM_Uty_find_first_of_char(benchmark::State& state) {
     const auto data = std::to_array({ 'z', 'o', 'n' });
     for (auto _ : state) {
@@ -58,6 +67,7 @@ static void BM_Uty_find_first_of_char(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_find_first_of_char);
+
 
 static void BM_Std_find_first_of_chars(benchmark::State& state) {
     const auto data = std::to_array({ 'z', 'o', 'n' });
@@ -80,6 +90,20 @@ static void BM_Uty_search_char_4letters(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_search_char_4letters);
+#ifndef EMSCRIPTEN
+static void BM_Zil_search_char_4letters(benchmark::State& state) {
+    std::string_view find = "stri";
+    for (auto _ : state) {
+        volatile auto iter = sz_find_substring(
+            LONG_STRING.data(),
+            LONG_STRING.size(),
+            find.data(),
+            find.size());
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_Zil_search_char_4letters);
+#endif
 
 static void BM_Std_search_char_4letters(benchmark::State& state) {
     std::string_view find = "stri";
@@ -94,19 +118,29 @@ static void BM_Std_search_char_4letters(benchmark::State& state) {
 }
 BENCHMARK(BM_Std_search_char_4letters);
 
-
 static void BM_Uty_search_char_8letters(benchmark::State& state) {
-   std::string_view find = "stringer";
-   for (auto _ : state) {
-       volatile auto iter = Utily::Simd128::Char::search(
-           LONG_STRING.data(),
-           LONG_STRING.size(),
-           find.data(),
-           find.size());
-       benchmark::DoNotOptimize(iter);
-   }
+    std::string_view find = "stringer";
+    for (auto _ : state) {
+        volatile auto index = Utily::Simd128::Char::search(
+            LONG_STRING.data(),
+            LONG_STRING.size(),
+            find.data(),
+            find.size());
+        benchmark::DoNotOptimize(index);
+    }
 }
 BENCHMARK(BM_Uty_search_char_8letters);
+
+#ifndef EMSCRIPTEN
+static void BM_Zil_search_char_8letters(benchmark::State& state) {
+    std::string_view find = "stringer";
+    for (auto _ : state) {
+        auto index = sz_find_substring(LONG_STRING.data(), LONG_STRING.size(), find.data(), find.size());
+        benchmark::DoNotOptimize(index);
+    }
+}
+BENCHMARK(BM_Zil_search_char_8letters);
+#endif
 
 static void BM_Std_search_char_8letters(benchmark::State& state) {
     std::string_view find = "stringer";

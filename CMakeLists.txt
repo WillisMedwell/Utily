@@ -106,7 +106,7 @@ if(BUILD_UTILY_BENCHMARKS)
         target_compile_options(UtilyBenchmark PRIVATE -msimd128 -mrelaxed-simd -msse -msse2 -msse3 -mavx)
     elseif(NOT MSVC)
         target_compile_options(UtilyBenchmark PRIVATE "-Wall" "-Wextra" "-Wpedantic" "-Wcast-align" "-Wcast-qual" "-Wctor-dtor-privacy" "-Wformat=2" "-Winit-self" "-Wmissing-declarations" "-Wmissing-include-dirs" "-Wold-style-cast" "-Woverloaded-virtual" "-Wredundant-decls" "-Wshadow" "-Wsign-conversion" "-Wsign-promo" "-Wstrict-overflow=5" "-Wswitch-default" "-Wundef" "-Wno-unused" "-Wconversion" "-Wsign-compare")
-        target_compile_options(UtilyBenchmark PRIVATE -march=native)
+        target_compile_options(UtilyBenchmark PRIVATE -mtune=native)
         target_compile_options(UtilyBenchmark PRIVATE
             $<$<CONFIG:Release>:-O3 -DNDEBUG>
         )

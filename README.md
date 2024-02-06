@@ -303,6 +303,44 @@ constexpr auto to_array(Args&&... args)
 
 </details>
 
+## Performance
+
+<details><summary><b>Simd128::Char</b></summary>
+
+**Windows MSVC** 
+
+| String Operation        | Std     | StringZilla | Utily       |
+| ----------------------- | ------- | ----------- | ----------- |
+| find                    | 13.2 ns | 109 ns      | **11.3 ns** |
+| find_first_of           | 837 ns  |             | **46.2 ns** |
+| find_substring(char[4]) | 192 ns  | 609 ns      | **58.4 ns** |
+| find_substring(char[8]) | 186 ns  | 1842 ns     | **65.6 ns** |
+
+*NOTE: StringZilla's method for SIMD seems be ignored by MSVC*
+
+**Clang (Server)** 
+
+| String Operation        | Std | StringZilla | Utily |
+| ----------------------- | --- | ----------- | ----- |
+| find                    |     |             |       |
+| find_first_of           |     |             |       |
+| find_substring(char[4]) |     |             |       |
+| find_substring(char[8]) |     |             |       |
+
+
+**Emscripten**
+
+| String Operation        | Std | StringZilla | Utily |
+| ----------------------- | --- | ----------- | ----- |
+| find                    |     |             |       |
+| find_first_of           |     |             |       |
+| find_substring(char[4]) |     |             |       |
+| find_substring(char[8]) |     |             |       |
+
+*NOTE: Only 128bit vector operations supported. *
+
+</details>
+
 ## Get Started
 
 <details><summary><b>Modern CMake</b></summary>
