@@ -542,7 +542,7 @@ namespace Utily::Simd512::Char {
             return static_cast<std::ptrdiff_t>(src_size);
         } else if (val_size == 4) {
             return Simd128::Char::search<4>(src_begin, src_size, val_begin);
-        } 
+        }
         assert(false && "not implemented");
         return std::distance(src_begin, std::search(src_begin, src_begin + src_size, val_begin, val_begin + val_size));
     }
@@ -554,6 +554,11 @@ namespace Utily::Simd512::Char {
     UTY_ALWAYS_INLINE static auto find(const char* src_begin, const size_t src_size, const char val) noexcept -> std::ptrdiff_t {
         return Utily::Simd128::Char::find(src_begin, src_size, val);
     }
+
+    UTY_ALWAYS_INLINE auto search(const char* src_begin, const size_t src_size, const char* val_begin, const size_t val_size) noexcept -> std::ptrdiff_t {
+        return Utily::Simd128::Char::search(src_begin, src_size, val_begin, val_size);
+    }
+
 }
 
 #endif // defined(_MSV_VER) || defined(__AVX2__)
