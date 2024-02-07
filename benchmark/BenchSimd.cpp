@@ -90,6 +90,7 @@ static void BM_Uty_search_char_4letters(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_search_char_4letters);
+
 #ifndef EMSCRIPTEN
 static void BM_Zil_search_char_4letters(benchmark::State& state) {
     std::string_view find = "stri";

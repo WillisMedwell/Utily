@@ -330,12 +330,12 @@ constexpr auto to_array(Args&&... args)
 
 **Emscripten**
 
-| String Operation        | Std | StringZilla | Utily |
-| ----------------------- | --- | ----------- | ----- |
-| find                    |     |             |       |
-| find_first_of           |     |             |       |
-| find_substring(char[4]) |     |             |       |
-| find_substring(char[8]) |     |             |       |
+| String Operation        | Std     | StringZilla | Utily       |
+| ----------------------- | ------- | ----------- | ----------- |
+| find                    | 405 ns  |             | **22.3 ns** |
+| find_first_of           | 1555 ns |             | **136 ns**  |
+| find_substring(char[4]) | 1110 ns |             | **196 ns**  |
+| find_substring(char[8]) | 938 ns  |             | **574 ns**  |
 
 *NOTE: Only 128bit vector operations supported. *
 
