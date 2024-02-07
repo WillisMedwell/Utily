@@ -15,10 +15,53 @@ using namespace std::literals;
 const auto NUMS = std::vector<uint8_t> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 const auto STRING = std::string { "more stuff here to fill in. hello world! This is a sentenze" };
 
-TEST(Simd, find) {
+TEST(Simd128, find) {
+
     EXPECT_EQ(
         std::ranges::find(STRING, 'z'),
         STRING.begin() + Utily::Simd128::Char::find(STRING.data(), STRING.size(), 'z'));
+
+    for (int64_t i = 0; i < 1000; ++i) {
+        std::string tmp;
+        tmp.resize(i);
+        std::ranges::fill(tmp, 'a');
+        tmp.push_back('z');
+        auto expected = std::ranges::find(tmp, 'z');
+        auto result = tmp.begin() + Utily::Simd128::Char::find(tmp.data(), tmp.size(), 'z');
+        EXPECT_EQ(expected, result);
+
+        for (int64_t j = i - 1; j > 0; --j) {
+            tmp[j] = 'z';
+            expected = std::ranges::find(tmp, 'z');
+            result = tmp.begin() + Utily::Simd128::Char::find(tmp.data(), tmp.size(), 'z');
+            EXPECT_EQ(expected, result);
+        }
+    }
+}
+
+TEST(Simd512, find) {
+ /*   EXPECT_EQ(
+        std::ranges::find(STRING, 'z'),
+        STRING.begin() + Utily::Simd512::Char::find(STRING.data(), STRING.size(), 'z'));*/
+
+    for (int64_t i = 0; i < 2000; ++i) {
+        std::string tmp;
+        tmp.resize(i);
+        std::ranges::fill(tmp, 'a');
+        tmp.push_back('z');
+        auto expected = std::ranges::find(tmp, 'z');
+        
+        auto result = tmp.begin() + Utily::Simd512::Char::find(tmp.data(), tmp.size(), 'z');
+        EXPECT_EQ(expected, result);
+
+        for (int64_t j = i - 1; j > 0; --j) {
+            tmp[static_cast<size_t>(j)] = 'z';
+            expected = std::ranges::find(tmp, 'z');
+            result = tmp.begin() + Utily::Simd512::Char::find(tmp.data(), tmp.size(), 'z');
+            EXPECT_EQ(expected, result);
+        }
+       
+    }
 }
 
 TEST(Simd, find_first_of) {
@@ -29,8 +72,7 @@ TEST(Simd, find_first_of) {
         STRING.begin() + Utily::Simd128::Char::find_first_of(STRING.data(), STRING.size(), delims.data(), delims.size()));
 }
 
-
-TEST(Simd, search_4letters) {
+TEST(Simd128, search_4letters) {
     std::string_view word1 = "sent";
     std::string_view word2 = "worl";
 
@@ -100,6 +142,56 @@ TEST(Simd, search_4letters) {
         }
     }
 }
+
+TEST(Simd512, search_4letters) {
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(std::numeric_limits<char>::min(), std::numeric_limits<char>::max());
+
+    std::string src;
+    for (size_t i = 0; i < 100; ++i) {
+        src.resize(i);
+        std::ranges::generate(src, [&]() { return static_cast<char>(dist(gen)); });
+
+        for (size_t j = 3; j < i; ++j) {
+            const char* delims = src.data() + j - 3;
+            
+            auto uty_result = std::string_view {
+                
+                src.begin() + Utily::Simd512::Char::search(src.data(), src.size(), delims, 4),
+                src.end()
+            };
+            auto std_expected = std::string_view {
+                std::search(src.begin(), src.end(), delims, delims + 4),
+                src.end()
+            };
+            EXPECT_EQ(std_expected, uty_result);
+        }
+
+        std::string delims;
+        delims.resize(4);
+        for (size_t j = 0; j < 10; ++j) {
+            std::ranges::generate(delims, [&]() { return static_cast<char>(dist(gen)); });
+
+            auto uty_result = std::string_view {
+                src.begin() + Utily::Simd512::Char::search(src.data(), src.size(), delims.data(), 4),
+                src.end()
+            };
+            auto std_expected = std::string_view {
+                std::search(src.begin(), src.end(), delims.begin(), delims.end()),
+                src.end()
+            };
+            if (std_expected != uty_result) {
+                std::clog << delims << '\n';
+                std::clog << src << '\n';
+                EXPECT_EQ(std_expected, uty_result);
+                assert(false);
+            }
+        }
+    }
+}
+
 
 TEST(Simd, search_8letters_basic) {
     std::string_view word1 = "sentenze";

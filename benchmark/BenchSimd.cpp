@@ -23,7 +23,7 @@ auto all_a(size_t max) -> std::string {
     v.append("stringer");
     return v;
 }
-const static std::string LONG_STRING = all_a(1000);
+const static std::string LONG_STRING = all_a(100000);
 
 auto iota(size_t max) -> std::vector<int32_t> {
     std::vector<int32_t> v;
@@ -40,6 +40,14 @@ static void BM_Uty_find_char(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_find_char);
+
+static void BM_Uty_find_char_512(benchmark::State& state) {
+    for (auto _ : state) {
+        volatile auto iter = Utily::Simd512::Char::find(LONG_STRING.data(), LONG_STRING.size(), 'z');
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_Uty_find_char_512);
 
 #ifndef EMSCRIPTEN
 static void BM_Zil_find_char(benchmark::State& state) {
@@ -90,6 +98,19 @@ static void BM_Uty_search_char_4letters(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_Uty_search_char_4letters);
+
+static void BM_Uty_search_char_4letters_512(benchmark::State& state) {
+    std::string_view find = "stri";
+    for (auto _ : state) {
+        volatile auto iter = Utily::Simd512::Char::search(
+            LONG_STRING.data(),
+            LONG_STRING.size(),
+            find.data(),
+            find.size());
+        benchmark::DoNotOptimize(iter);
+    }
+}
+BENCHMARK(BM_Uty_search_char_4letters_512);
 
 #ifndef EMSCRIPTEN
 static void BM_Zil_search_char_4letters(benchmark::State& state) {
