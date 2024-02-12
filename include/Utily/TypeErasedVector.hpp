@@ -15,6 +15,16 @@
 #include <malloc.h>
 #endif
 
+#ifndef UTY_ALWAYS_INLINE
+#if defined(__GNUC__) || defined(__clang__)
+#define UTY_ALWAYS_INLINE __attribute__((always_inline)) inline
+#elif defined(_MSC_VER)
+#define UTY_ALWAYS_INLINE __forceinline
+#else
+#define UTY_ALWAYS_INLINE inline
+#endif
+#endif // UTY_ALWAYS_INLINE
+
 namespace Utily {
     class TypeErasedVector
     {
@@ -46,8 +56,7 @@ namespace Utily {
 #else
                 void* new_data = std::realloc(
                     _data,
-                    _type_size * (static_cast<size_t>(_data_capacity) * 2)
-                    );
+                    _type_size * (static_cast<size_t>(_data_capacity) * 2));
 #endif
                 if (new_data != nullptr) {
                     _data = new_data;
@@ -90,7 +99,7 @@ namespace Utily {
         }
 
         template <typename T>
-        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t [[maybe_unused]], size_t n) 
+        UTY_ALWAYS_INLINE constexpr TypeErasedVector(T t [[maybe_unused]], size_t n)
             : _type_name(Utily::Reflection::get_type_name<T>())
             , _type_alignment(alignof(T))
             , _type_size(sizeof(T))

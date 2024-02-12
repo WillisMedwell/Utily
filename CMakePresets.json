@@ -15,6 +15,7 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_UTILY_TESTS": "ON",
                 "BUILD_UTILY_BENCHMARKS": "ON",
+                "BUILD_UTILY_EXAMPLES": "ON",
                 "HAVE_STEADY_CLOCK": "0",
                 "HAVE_POSIX_REGEX": "0",
                 "HAVE_STD_REGEX": "0",
@@ -33,6 +34,7 @@
             "cacheVariables": {
                 "BUILD_UTILY_TESTS": "ON",
                 "BUILD_UTILY_BENCHMARKS": "ON",
+                "BUILD_UTILY_EXAMPLES": "ON",
                 "HAVE_STEADY_CLOCK": "0",
                 "HAVE_POSIX_REGEX": "0",
                 "HAVE_STD_REGEX": "0",
@@ -52,6 +54,7 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_UTILY_TESTS": "ON",
                 "BUILD_UTILY_BENCHMARKS": "ON",
+                "BUILD_UTILY_EXAMPLES": "ON",
                 "HAVE_STEADY_CLOCK": "0",
                 "HAVE_POSIX_REGEX": "0",
                 "HAVE_STD_REGEX": "0",

@@ -15,7 +15,6 @@
 #include <utility>
 
 #include <Utily/Concepts.hpp>
-#include <Utily/Simd.hpp>
 
 namespace Utily {
 

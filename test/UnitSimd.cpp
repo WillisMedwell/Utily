@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "Utily/Utily.hpp"
+#include "Utily/Simd128.hpp"
+#include "Utily/Simd512.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -23,7 +25,7 @@ TEST(Simd128, find) {
 
     for (int64_t i = 0; i < 1000; ++i) {
         std::string tmp;
-        tmp.resize(i);
+        tmp.resize(static_cast<size_t>(i));
         std::ranges::fill(tmp, 'a');
         tmp.push_back('z');
         auto expected = std::ranges::find(tmp, 'z');
@@ -31,7 +33,7 @@ TEST(Simd128, find) {
         EXPECT_EQ(expected, result);
 
         for (int64_t j = i - 1; j > 0; --j) {
-            tmp[j] = 'z';
+            tmp[static_cast<size_t>(j)] = 'z';
             expected = std::ranges::find(tmp, 'z');
             result = tmp.begin() + Utily::Simd128::Char::find(tmp.data(), tmp.size(), 'z');
             EXPECT_EQ(expected, result);
@@ -46,7 +48,7 @@ TEST(Simd512, find) {
 
     for (int64_t i = 0; i < 2000; ++i) {
         std::string tmp;
-        tmp.resize(i);
+        tmp.resize(static_cast<size_t>(i));
         std::ranges::fill(tmp, 'a');
         tmp.push_back('z');
         auto expected = std::ranges::find(tmp, 'z');

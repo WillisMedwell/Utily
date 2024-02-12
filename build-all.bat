@@ -11,7 +11,7 @@ if not exist "build-native\" (
     mkdir build-native
 )
 cd build-native
-call cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_UTILY_TESTS=1 -DBUILD_UTILY_BENCHMARKS=1 -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+call cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DBUILD_UTILY_TESTS=1 -DBUILD_UTILY_BENCHMARKS=1 -DBUILD_UTILY_EXAMPLES=1 -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 call cmake --build . --config %BUILD_TYPE%
 cd ..
 
