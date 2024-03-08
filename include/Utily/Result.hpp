@@ -12,7 +12,9 @@ namespace Utily {
     class Result
     {
     private:
-        using InternalResult = std::variant<Value, Error>;
+        using V = std::optional<Value>;
+        using E = std::optional<Error>;
+        using InternalResult = std::variant<V, E>;
         InternalResult _result;
 
     public:
@@ -59,30 +61,30 @@ namespace Utily {
         }
 
         [[nodiscard]] constexpr bool has_value() const noexcept {
-            return std::holds_alternative<Value>(_result);
+            return std::holds_alternative<V>(_result);
         }
         [[nodiscard]] constexpr bool has_error() const noexcept {
-            return std::holds_alternative<Error>(_result);
+            return std::holds_alternative<E>(_result);
         }
 
         [[nodiscard]] constexpr auto value() -> Value& {
-            return std::get<Value>(_result);
+            return std::get<V>(_result).value();
         }
         [[nodiscard]] constexpr auto value() const -> const Value& {
-            return std::get<Value>(_result);
+            return std::get<V>(_result).value();
         }
         [[nodiscard]] constexpr auto error() -> Error& {
-            return std::get<Error>(_result);
+            return std::get<E>(_result).value();
         }
         [[nodiscard]] constexpr auto error() const -> const Error& {
-            return std::get<Error>(_result);
+            return std::get<E>(_result).value();
         }
 
         template <typename Pred>
             requires Utily::Concepts::IsConstCallableWith<Pred, Value>
         constexpr auto on_value(Pred pred) const noexcept -> const Result& {
             if (has_value()) {
-                pred(std::get<Value>(_result));
+                pred(std::get<V>(_result).value());
             }
             return *this;
         }
@@ -91,7 +93,7 @@ namespace Utily {
             requires Utily::Concepts::IsCallableWith<Pred, Value>
         constexpr auto on_value(Pred pred) noexcept -> Result& {
             if (has_value()) {
-                pred(std::get<Value>(_result));
+                pred(std::get<V>(_result).value());
             }
             return *this;
         }
@@ -100,7 +102,7 @@ namespace Utily {
             requires Utily::Concepts::IsConstCallableWith<Pred, Error>
         constexpr auto on_error(Pred pred) const noexcept -> const Result& {
             if (has_error()) {
-                pred(std::get<Error>(_result));
+                pred(std::get<E>(_result).value());
             }
             return *this;
         }
@@ -109,7 +111,7 @@ namespace Utily {
             requires Utily::Concepts::IsCallableWith<Pred, Error>
         constexpr auto on_error(Pred pred) noexcept -> Result& {
             if (has_error()) {
-                pred(std::get<Error>(_result));
+                pred(std::get<E>(_result).value());
             }
             return *this;
         }
@@ -118,10 +120,10 @@ namespace Utily {
             requires Utily::Concepts::IsCallableWith<ValuePred, Value>
             && Utily::Concepts::IsCallableWith<ErrorPred, Error>
         constexpr auto on_either(ValuePred value_pred, ErrorPred error_pred) -> Result& {
-            if (std::holds_alternative<Value>(_result)) {
-                value_pred(std::get<Value>(_result));
+            if (std::holds_alternative<V>(_result)) {
+                value_pred(std::get<V>(_result).value());
             } else {
-                error_pred(std::get<Error>(_result));
+                error_pred(std::get<E>(_result).value());
             }
             return *this;
         }
@@ -131,9 +133,16 @@ namespace Utily {
             && Utily::Concepts::IsConstCallableWith<ErrorPred, Error>
         constexpr auto on_either(ValuePred value_pred, ErrorPred error_pred) const noexcept -> const Result& {
             if (std::holds_alternative<Value>(_result)) {
-                value_pred(std::get<Value>(_result));
+                value_pred(std::get<V>(_result).value());
             } else {
-                error_pred(std::get<Error>(_result));
+                error_pred(std::get<E>(_result).value());
+            }
+            return *this;
+        }
+
+        auto on_error_panic() -> Result& {
+            if(std::holds_alternative<E>(_result)) {
+                throw std::runtime_error("Error encountered, panicking.");
             }
             return *this;
         }
