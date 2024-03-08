@@ -146,6 +146,10 @@ namespace Utily {
             }
             return *this;
         }
+
+        auto value_move() -> Value&& {
+            return std::move(std::get<V>(_result).value());
+        }
     };
 
     template <typename Error>
