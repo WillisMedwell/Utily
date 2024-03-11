@@ -9,5 +9,6 @@
 #include "Utily/ErrorHandler.hpp"
 #include "Utily/Result.hpp"
 #include "Utily/FileReader.hpp"
+#include "Utily/FileWriter.hpp"
 #include "Utily/AsyncFileReader.hpp"
 #include "Utily/InlineArrays.hpp"
