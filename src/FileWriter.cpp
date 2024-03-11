@@ -58,18 +58,17 @@ namespace Utily {
 
         FILE* handle = nullptr;
         const char* fp_u8 = nullptr;
-        errno_t opening_file_result = 0;
 
         if constexpr (std::same_as<const char*, decltype(fp)>) {
             fp_u8 = reinterpret_cast<const char*>(fp);
-            opening_file_result = fopen_s(&handle, fp_u8, "wb");
+            handle = fopen(fp_u8, "wb");
         } else if constexpr(!std::same_as<const int8_t*, decltype(fp)>) {
             const std::string str = file_path.string();
             fp_u8 = str.c_str();
-            opening_file_result = fopen_s(&handle, fp_u8, "wb");
+            handle = fopen(fp_u8, "wb");
         }
 
-        if (handle == nullptr || opening_file_result) {
+        if (!handle) {
             return Utily::Error { std::format("The file {} could not be opened/created.", file_path.string()) };
         }
 
